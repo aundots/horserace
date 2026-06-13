@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>인앱토스 말경주 — 마케팅 브리프</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    color: #1a1a2e;
+    margin: 0;
+    padding: 0;
+  }
+  .cover {
+    background: linear-gradient(135deg, #0064ff 0%, #3182f6 50%, #1a1a2e 100%);
+    color: #fff;
+    padding: 32px 28px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+  }
+  .cover h1 { font-size: 22pt; margin: 0 0 8px; border: none; color: #fff; }
+  .cover .meta { font-size: 10pt; opacity: 0.9; line-height: 1.8; }
+  .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 9pt;
+    margin-right: 6px;
+    margin-top: 12px;
+  }
+  h1 { font-size: 16pt; color: #0064ff; border-bottom: 2px solid #0064ff; padding-bottom: 6px; margin-top: 22px; }
+  h2 { font-size: 12.5pt; color: #1a1a2e; margin-top: 20px; border-left: 4px solid #0064ff; padding-left: 10px; }
+  h3 { font-size: 11pt; color: #333; margin-top: 14px; }
+  p { margin: 6px 0; }
+  blockquote {
+    background: #f0f6ff;
+    border-left: 4px solid #0064ff;
+    margin: 12px 0;
+    padding: 12px 16px;
+    font-size: 11pt;
+    font-weight: 600;
+    color: #0064ff;
+    border-radius: 0 8px 8px 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 16px;
+    font-size: 9.5pt;
+    page-break-inside: avoid;
+  }
+  th { background: #0064ff; color: #fff; padding: 8px 10px; text-align: left; font-weight: 600; }
+  td { border: 1px solid #e5e8eb; padding: 7px 10px; vertical-align: top; }
+  tr:nth-child(even) td { background: #f9fafb; }
+  pre.code {
+    background: #f4f5f7;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 9pt;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    border: 1px solid #e5e8eb;
+    page-break-inside: avoid;
+  }
+  code { background: #f0f2f5; padding: 1px 5px; border-radius: 3px; font-size: 9pt; }
+  .footer {
+    margin-top: 28px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e8eb;
+    font-size: 8.5pt;
+    color: #888;
+    font-style: italic;
+  }
+  strong { color: #0064ff; }
+</style>
+</head>
+<body>
+<div class="cover">
+  <h1>인앱토스 말경주 게임</h1>
+  <div class="meta">마케팅팀 원페이지 브리프 · 2026년 6월</div>
+  <span class="badge">Apps in Toss</span>
+  <span class="badge">캐주얼 레이스</span>
+  <span class="badge">베팅 없음</span>
+  <span class="badge">F2P</span>
+</div>
+<p>title: 인앱토스 말경주 게임 — 마케팅 브리프</p><p>subtitle: Apps in Toss Mini App | horserace</p><p>date: 2026년 6월</p><h1>인앱토스 말경주 게임</h1><h2>마케팅팀 원페이지 브리프</h2><p><strong>플랫폼</strong> · 앱인토스(토스 앱 내 WebView 미니앱)  </p><p><strong>장르</strong> · 캐주얼 말 육성 + 주말 랭킹 경주 + 찌라시 예상  </p><p><strong>세션</strong> · 1회 5~8분 · 경주 1판 1.5~3분(엎치락뒤치락) · 첫 경주 30초 내 시작  </p><p><strong>상태</strong> · 기획 확정 · 개발 착수 전</p><h2>한 줄 포지셔닝</h2><blockquote><strong>「끝까지 엎치락뒤치락, 주말엔 찌라시로 우승마를 맞혀라」</strong>  </blockquote><blockquote>베팅 없는 경마 긴장감 · 역전 가득한 2분 레이스 · 토스 안에서 오래 머무는 육성 게임</blockquote><h2>타깃 &amp; 가치 제안</h2><table><thead><tr><th>타깃</th><th>메시지</th></tr></thead><tbody><tr><td><strong>토스 라이트 유저</strong></td><td>출퇴근·점심 5분, 코인 입장료 없이 매일 연습주행</td></tr><tr><td><strong>경마·스포츠 팬</strong></td><td>주로·페이스·거리 적성 반영, 찌라시로 「읽는 재미」</td></tr><tr><td><strong>경쟁형 유저</strong></td><td>주말 디비전 랭킹, 40명 룸에서 1위 도전</td></tr><tr><td><strong>수집·예측형</strong></td><td>1착 예상 적중 → 칭호·도감·적중 상자</td></tr></tbody></table><h2>핵심 게임 루프</h2><pre class="code">[매일]  연습주행 (~1.5분, 역전 연출) → 소량 골드
+[평일]  말 훈련·먹이 (30초, 선택) → 주말 버프
+[주말]  찌라시 확인 → 1마리 예상 → 랭킹 경주 → 순위·적중 보상
+</pre><p><strong>모드 명칭</strong> · 일상 <strong>연습주행</strong> / 주말 <strong>랭킹 경주(본경주)</strong>  </p><p><strong>차별점</strong> · 실시간 대기 없음 · 베팅·마권 없음 · 평일 안 해도 주말 3회 무료 랭킹 가능</p><h2>주간 리듬 (마케팅 캘린더용)</h2><table><thead><tr><th>요일</th><th>유저 행동</th><th>홍보 훅 예시</th></tr></thead><tbody><tr><td>월~목</td><td>연습주행 + 가벼운 훈련</td><td>「손 풀고 버프 쌓기」</td></tr><tr><td>금</td><td>랭킹 D-1</td><td>「내일 주로 편성 공개」</td></tr><tr><td>토~일</td><td>랭킹 3회 + 예상</td><td>「찌라시 읽고 1착 맞히기」</td></tr><tr><td>일 21시</td><td>정산 임박</td><td>「1시간 뒤 디비전 순위 확정」</td></tr></tbody></table><h2>주말 핵심 콘텐츠: 찌라시 &amp; 예상</h2><p><strong>베팅 대신 「예상」</strong> — 정책·브랜드 모두 안전한 경마 감성</p><p>1. 출전표 + 찌라시 2~4장 (습윤 강함, 추입 마무리 등)</p><p>2. 8마리 중 <strong>1마리 예상 1착</strong> (골드 걸기 없음)</p><p>3. 적중 시 <strong>칭호 · 도감 · 적중 상자</strong> (토스포인트 아님)</p><table><thead><tr><th>적중</th><th>보상</th></tr></thead><tbody><tr><td>1착</td><td>칭호, 도감, 적중 상자</td></tr><tr><td>2착 이내</td><td>소량 골드, 도감</td></tr><tr><td>연속 적중</td><td>한정 칭호</td></tr></tbody></table><p><strong>마케팅 금지</strong> · 배당·odds·대박·확정 수익 · 「마권」 용어 (게임 화폐는 <strong>골드</strong>)</p><h2>경제 &amp; 수익 (v3 자유시장)</h2><table><thead><tr><th>구분</th><th>내용</th></tr></thead><tbody><tr><td><strong>골드</strong></td><td>경주·미션 획득 → 상점·추가 티켓·거래소</td></tr><tr><td><strong>랭킹 티켓</strong></td><td>일 3회 무료 + 골드 구매 + 광고 선택</td></tr><tr><td><strong>거래소</strong></td><td>외형·소모품 거래 (스탯·베팅 없음)</td></tr><tr><td><strong>찌라시 장터</strong></td><td>고수 팁을 골드에 판매 (정보 시장)</td></tr><tr><td><strong>광고</strong></td><td>골드 2배·추가 경주 등 <strong>전부 선택</strong> (필수 아님)</td></tr><tr><td><strong>토스 포인트</strong></td><td><strong>주간 패스 완료</strong> 시만 (순위·승패 연동 금지)</td></tr></tbody></table><p><strong>슬로건</strong> · 「막지 않고, 더 하고 싶을 때만 광고·골드」</p><h2>랭킹 &amp; 공정성 (유저 커뮤니케이션용)</h2><p>- <strong>디비전 룸</strong> · 주마다 약 40명과 경쟁 (전 서버 1인 독점 방지)</p><p>- <strong>5티어</strong> · 브론즈 → 마스터 승급·강등</p><p>- <strong>주간 점수 리셋</strong> · 매주 새 출발, 상위 2경주 평균 반영</p><p>- <strong>뉴비 안전망 7일</strong> · 강등·함정 찌라시 보호 (장기 특혜 없음)</p><h2>말 관리 &amp; 방치 (케어 메시지)</h2><table><thead><tr><th>미접속</th><th>스토리텔링</th></tr></thead><tbody><tr><td>2~3일</td><td>「말이 심심해해요」</td></tr><tr><td>4~6일</td><td>컨디션 하락, 주말 버프 감소</td></tr><tr><td>7일+</td><td>복귀 웰컴 + 재활 안내</td></tr><tr><td>14일+</td><td>랭킹 잠금 → 먹이·휴식·연습주행으로 재활</td></tr></tbody></table><p><strong>톤</strong> · 유기·사망 묘사 금지 · 「돌아와서 케어해 주세요」</p><h2>수익 모델 — 두 축</h2><table><thead><tr><th>축</th><th>목표</th><th>설계</th></tr></thead><tbody><tr><td><strong>① 체류시간</strong></td><td>세션 <strong>5~8분</strong></td><td>경주 연출 45~70초, 찌라시·결과·리플레이, 홈·랭킹·거래소</td></tr><tr><td><strong>② 광고 시청</strong></td><td>일 <strong>1.5~2.5회</strong> RV</td><td>경주 후 골드 2배·추가 티켓 등 <strong>선택</strong> 시청</td></tr></tbody></table><p><strong>수익 공식</strong> · DAU × <strong>체류</strong> × <strong>RV/세션</strong> (체류가 길수록 광고 기회 증가)</p><table><thead><tr><th>수익원</th><th>비중</th><th>비고</th></tr></thead><tbody><tr><td>리워드 광고</td><td>80~95%</td><td>수익 축 ②</td></tr><tr><td>배너</td><td>5~20%</td><td>체류·화면 체류 연동</td></tr><tr><td>토스 포인트</td><td>마케팅 비용</td><td>주간 패스만</td></tr></tbody></table><h2>정책·브랜드 레드라인</h2><table><thead><tr><th>불가</th><th>대체</th></tr></thead><tbody><tr><td>P2P 마권·베팅·배당</td><td>찌라시 예상 + 적중 상자</td></tr><tr><td>골드 → 토스P 환전</td><td>주간 패스 미션 달성 보상</td></tr><tr><td>순위·승패 연동 토스P</td><td>참가·접속 등 고정 미션</td></tr><tr><td>사행성 과장 광고</td><td>「예상」「적중」「도감」</td></tr></tbody></table><h2>리텐션 장치 (푸시·CRM 키워드)</h2><p>- 출석 스트릭 · 28일 출석판</p><p>- 주말 카운트다운 · Almost there (「1위까지 42점」)</p><p>- 말 도감 · 예측 리그 · 시즌 명예의 전당</p><p>- 복귀 웰컴 (7일 방치)</p><h2>KPI 목표 (튜닝 후)</h2><table><thead><tr><th>지표</th><th>목표</th></tr></thead><tbody><tr><td>D1 리텐션</td><td>35~45%</td></tr><tr><td>평균 체류</td><td>5~8분/세션</td></tr><tr><td>경주 1판</td><td>연습주행 ~1.5분 · 랭킹 ~2~3분 (역전 4~8회)</td></tr><tr><td>첫 경주</td><td>진입 30초 내 시작</td></tr><tr><td>일 RV</td><td>1.5~2.5회 (선택)</td></tr></tbody></table><h2>출시 로드맵</h2><table><thead><tr><th>단계</th><th>기간</th><th>마케팅 관점</th></tr></thead><tbody><tr><td>Phase 0</td><td>병행</td><td>앱인토스 콘솔 등록, 브랜드명 확정</td></tr><tr><td>Phase 1</td><td>1~2주</td><td>MVP · QR 테스트 영상</td></tr><tr><td>Phase 2</td><td>1~2주</td><td>거래소·광고 연동 · 소프트 런치</td></tr><tr><td>Phase 3</td><td>1~2주</td><td>게임 등급 · 검수 · 정식 오픈</td></tr></tbody></table><h2>카피 가이드</h2><h3>사용 권장</h3><p>- 「지금 달리기」「찌라시」「예상 1착」「디비전 1위」「주간 패스」</p><p>- 「끝까지 엎치락뒤치락 경마」「역전 포토피니시」</p><p>- 「앱 안에서 5분 한 세션」</p><p>- 「광고 없이도 오늘 3번 랭킹」</p><h3>사용 금지</h3><p>- 마권, 배당, 베팅, 대박, 확정 수익, 환전, 출금</p><p>- 토스포인트를 순위 보상처럼 표현</p><h2>문의·참고</h2><p>- 개발 계획 상세: <code>인앱토스_말경주_게임_0472fc89.plan.md</code></p><p>- 앱인토스 게임 출시 가이드 · 프로모션 정책 준수 전제</p><p>*본 문서는 2026년 6월 기준 기획 스냅샷입니다. 검수·등급분류 전 카피·확률표는 최종 조정될 수 있습니다.*</p>
+<div class="footer">horserace · 내부 기획 문서 · 검수 전 카피·수치는 변경될 수 있음</div>
+</body>
+</html>
