@@ -20,7 +20,11 @@ app.use(
   cors({
     origin: config.corsOrigins,
     credentials: true,
-    allowedHeaders: ["Content-Type", "X-Session-Id"],
+    allowedHeaders: [
+      "Content-Type",
+      "X-Session-Id",
+      "X-Horserace-Demo-State",
+    ],
   }),
 );
 app.use(express.json());
