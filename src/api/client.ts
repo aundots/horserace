@@ -2,9 +2,13 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000";
 const DEMO_STATE_KEY = "horserace.demoState";
 const IS_PLAY_STORE = import.meta.env.VITE_PLAY_STORE === "true";
 
+function readDemoState(): string | null {
+  return localStorage.getItem(DEMO_STATE_KEY);
+}
+
 function demoHeaders(): Record<string, string> {
   if (!IS_PLAY_STORE) return {};
-  const demoState = localStorage.getItem(DEMO_STATE_KEY);
+  const demoState = readDemoState();
   return demoState ? { "X-Horserace-Demo-State": demoState } : {};
 }
 
@@ -23,14 +27,24 @@ export async function apiPost<T>(
   body: unknown,
   sessionId?: string | null,
 ): Promise<T> {
+  const demoState = readDemoState();
+  const requestBody =
+    IS_PLAY_STORE && demoState
+      ? {
+          ...(body && typeof body === "object" && body !== null
+            ? (body as Record<string, unknown>)
+            : {}),
+          _demoState: demoState,
+        }
+      : body;
+
   const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...demoHeaders(),
       ...(sessionId ? { "X-Session-Id": sessionId } : {}),
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(requestBody),
   });
   const data = await res.json();
   saveDemoState(data);

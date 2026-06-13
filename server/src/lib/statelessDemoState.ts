@@ -28,6 +28,14 @@ function safeEqual(a: string, b: string): boolean {
   return timingSafeEqual(ab, bb);
 }
 
+const DATE_KEYS = new Set([
+  "raceStaminaUpdatedAt",
+  "createdAt",
+  "lastLoginAt",
+  "recordedAt",
+  "expiresAt",
+]);
+
 function replacer(_key: string, value: unknown) {
   if (value instanceof Date) {
     return { __t: "Date", v: value.toISOString() };
@@ -35,7 +43,7 @@ function replacer(_key: string, value: unknown) {
   return value;
 }
 
-function reviver(_key: string, value: unknown) {
+function reviver(key: string, value: unknown) {
   if (
     value &&
     typeof value === "object" &&
@@ -43,6 +51,13 @@ function reviver(_key: string, value: unknown) {
     typeof (value as { v?: string }).v === "string"
   ) {
     return new Date((value as { v: string }).v);
+  }
+  if (
+    typeof value === "string" &&
+    DATE_KEYS.has(key) &&
+    /^\d{4}-\d{2}-\d{2}T/.test(value)
+  ) {
+    return new Date(value);
   }
   return value;
 }

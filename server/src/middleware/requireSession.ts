@@ -30,7 +30,11 @@ export async function requireSession(
   }
 
   if (isPlayDemoEnabled()) {
-    const demoToken = req.header("x-horserace-demo-state");
+    let demoToken = req.header("x-horserace-demo-state");
+    if (!demoToken && req.body && typeof req.body._demoState === "string") {
+      demoToken = req.body._demoState;
+      delete req.body._demoState;
+    }
     if (demoToken) {
       hydrateDemoStateToken(demoToken, session.userKey);
     }
@@ -43,13 +47,17 @@ export async function requireSession(
   (req as AuthedRequest).userKey = session.userKey;
 
   if (isPlayDemoEnabled()) {
-    const originalJson = res.json.bind(res);
-    res.json = (body: unknown) => {
-      if (body && typeof body === "object" && !Array.isArray(body)) {
-        attachDemoState(session.userKey, body as Record<string, unknown>);
-      }
-      return originalJson(body);
-    };
+    const resWithFlag = res as Response & { _demoJsonPatched?: boolean };
+    if (!resWithFlag._demoJsonPatched) {
+      resWithFlag._demoJsonPatched = true;
+      const originalJson = res.json.bind(res);
+      res.json = (body: unknown) => {
+        if (body && typeof body === "object" && !Array.isArray(body)) {
+          attachDemoState(session.userKey, body as Record<string, unknown>);
+        }
+        return originalJson(body);
+      };
+    }
   }
 
   next();
