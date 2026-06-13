@@ -1,13 +1,18 @@
 /** 베이스(빨간 실크) 기준 hue-rotate — 경기마다 1~8번에 셔플 배정 */
 export const SILK_HUES = [0, 38, 72, 120, 165, 210, 270, 310] as const;
 
-export const RACE_HORSE_BASE = "/assets/race-horse-base.png";
+function assetUrl(path: string): string {
+  const base = import.meta.env.BASE_URL ?? "/";
+  return `${base}${path.replace(/^\//, "")}`;
+}
+
+export const RACE_HORSE_BASE = assetUrl("assets/race-horse-base.png");
 
 /** 달리기 연출 — 시트에서 추출한 유효 프레임 */
 export const RACE_HORSE_FRAMES = [
-  "/assets/race-horse-frame-3.png",
-  "/assets/race-horse-frame-4.png",
-  "/assets/race-horse-frame-5.png",
+  assetUrl("assets/race-horse-frame-3.png"),
+  assetUrl("assets/race-horse-frame-4.png"),
+  assetUrl("assets/race-horse-frame-5.png"),
 ];
 
 export function silkHueForNumber(number: number, map?: Record<number, number>): number {
