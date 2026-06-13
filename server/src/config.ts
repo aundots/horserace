@@ -24,6 +24,11 @@ export const config = {
   tossApiBase: "https://apps-in-toss-api.toss.im",
   corsOrigins: [
     "http://localhost:5173",
+    "http://localhost:4173",
+    "https://aundots.github.io",
+    ...(process.env.CORS_ORIGINS?.split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean) ?? []),
     `https://${process.env.APP_NAME ?? "horserace"}.private-apps.tossmini.com`,
     `https://${process.env.APP_NAME ?? "horserace"}.apps.tossmini.com`,
   ],
