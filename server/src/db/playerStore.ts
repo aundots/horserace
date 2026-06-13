@@ -17,6 +17,7 @@ import { rankedTicketGoldPrice } from "../lib/economy.js";
 import { migrateRaceLoopFields, raceLoopSnapshot, resetSessionRaceStreak } from "../lib/raceLoop.js";
 import { freshPass, syncPassWeek, type WeeklyPassState } from "../lib/weeklyPass.js";
 import { isDevUser } from "../lib/devAccess.js";
+import { isPlayDemoUser, PLAY_DEMO_RANKED_TICKETS_DAILY } from "../lib/playDemo.js";
 import { daysAbsentKst, kstDateKey, kstWeekId, nowKst } from "../lib/kst.js";
 
 export type HorseProfile = {
@@ -96,6 +97,11 @@ const RANKED_TICKETS_DAILY = 1;
 const RANKED_BUY_DAILY = 0;
 const TRAIN_DAILY = 3;
 const DEV_RANKED_TICKETS = 999;
+
+function rankedTicketsDailyFree(userKey: number): number {
+  if (isPlayDemoUser(userKey)) return PLAY_DEMO_RANKED_TICKETS_DAILY;
+  return RANKED_TICKETS_DAILY;
+}
 
 function randomPick<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)];
@@ -339,7 +345,7 @@ export function spendPracticeStamina(player: PlayerState) {
 
 export function totalRankedTickets(player: PlayerState) {
   if (isDevUser(player.userKey)) return DEV_RANKED_TICKETS;
-  return RANKED_TICKETS_DAILY + player.rankedTicketsBought + player.adRankedTickets;
+  return rankedTicketsDailyFree(player.userKey) + player.rankedTicketsBought + player.adRankedTickets;
 }
 
 export function rankedTicketsUsedTotal(player: PlayerState) {
@@ -505,7 +511,7 @@ export function getPlayerSnapshot(player: PlayerState) {
     raceStaminaMax: STAMINA_MAX,
     rankedTicketsLeft: Math.max(0, totalRankedTickets(player) - player.rankedTicketsUsed),
     rankedTicketsMax: totalRankedTickets(player),
-    rankedTicketsFree: RANKED_TICKETS_DAILY,
+    rankedTicketsFree: rankedTicketsDailyFree(player.userKey),
     rankedTicketBuyPrice: ticketPrice,
     rankedTicketsBoughtLeft: RANKED_BUY_DAILY - player.rankedTicketsBought,
     practiceCountToday: player.practiceCountToday,
@@ -541,7 +547,7 @@ export function getPlayerSnapshot(player: PlayerState) {
     ...raceLoopSnapshot(player),
     freePath: {
       practice: player.raceStamina,
-      ranked: Math.max(0, RANKED_TICKETS_DAILY - player.rankedTicketsUsed),
+      ranked: Math.max(0, rankedTicketsDailyFree(player.userKey) - player.rankedTicketsUsed),
     },
     kstNow: nowKst().toISOString(),
   };
