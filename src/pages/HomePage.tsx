@@ -46,6 +46,8 @@ export function HomePage({
   const {
     snapshot,
     loading: playerLoading,
+    loadError,
+    refresh,
     prepareRanked,
     getAdEligibility,
   } = player;
@@ -95,7 +97,7 @@ export function HomePage({
     return adPlacements.find((p) => p.id === id);
   }
 
-  if (loading || (isLoggedIn && !snapshot)) {
+  if (loading || (isLoggedIn && playerLoading && !snapshot)) {
     return (
       <Top
         title={<Top.TitleParagraph size={22}>말레이스</Top.TitleParagraph>}
@@ -103,6 +105,50 @@ export function HomePage({
           <Top.SubtitleParagraph size={15}>불러오는 중...</Top.SubtitleParagraph>
         }
       />
+    );
+  }
+
+  if (isLoggedIn && !snapshot && !playerLoading) {
+    return (
+      <>
+        <Top
+          title={<Top.TitleParagraph size={22}>말레이스</Top.TitleParagraph>}
+          subtitleBottom={
+            <Top.SubtitleParagraph size={15}>
+              {loadError ?? "게임 정보를 불러오지 못했어요."}
+            </Top.SubtitleParagraph>
+          }
+        />
+        <div style={{ padding: "0 20px", display: "grid", gap: 10 }}>
+          <Button display="block" size="xlarge" onClick={refresh}>
+            다시 시도
+          </Button>
+          {isPlayStore ? (
+            <Button
+              display="block"
+              size="large"
+              color="dark"
+              variant="weak"
+              onClick={() => {
+                logout();
+                demoLogin();
+              }}
+            >
+              다시 체험하기
+            </Button>
+          ) : (
+            <Button
+              display="block"
+              size="large"
+              color="dark"
+              variant="weak"
+              onClick={logout}
+            >
+              로그아웃
+            </Button>
+          )}
+        </div>
+      </>
     );
   }
 

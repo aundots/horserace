@@ -39,6 +39,7 @@ export function useAuth() {
         if (!cancelled) setUserKey(me.userKey);
       } catch {
         localStorage.removeItem(SESSION_KEY);
+        clearDemoState();
         if (!cancelled) setSessionId(null);
       } finally {
         if (!cancelled) setLoading(false);

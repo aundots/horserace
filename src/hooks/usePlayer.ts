@@ -29,19 +29,26 @@ type RevealTipResponse = {
 export function usePlayer(sessionId: string | null) {
   const [snapshot, setSnapshot] = useState<PlayerSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     if (!sessionId) {
       setSnapshot(null);
+      setLoadError(null);
       setLoading(false);
       return;
     }
     setLoading(true);
+    setLoadError(null);
     try {
       const data = await apiGet<StatusResponse>("/player/status", sessionId);
       setSnapshot(data);
-    } catch {
+      setLoadError(null);
+    } catch (error) {
       setSnapshot(null);
+      setLoadError(
+        error instanceof Error ? error.message : "플레이어 정보를 불러올 수 없어요.",
+      );
     } finally {
       setLoading(false);
     }
@@ -50,6 +57,7 @@ export function usePlayer(sessionId: string | null) {
   useEffect(() => {
     if (!sessionId) {
       setSnapshot(null);
+      setLoadError(null);
       setLoading(false);
       return;
     }
@@ -346,6 +354,7 @@ export function usePlayer(sessionId: string | null) {
   return {
     snapshot,
     loading,
+    loadError,
     refresh,
     applySnapshot,
     runPractice,
