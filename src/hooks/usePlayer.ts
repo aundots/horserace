@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiGet, apiPost } from "../api/client";
+import { isPlayStoreBuild } from "../lib/playStore";
 import type { HorseDraft } from "../lib/horseBuild";
 import type {
   AdPlacement,
@@ -41,7 +42,9 @@ export function usePlayer(sessionId: string | null) {
     setLoading(true);
     setLoadError(null);
     try {
-      const data = await apiGet<StatusResponse>("/player/status", sessionId);
+      const data = isPlayStoreBuild()
+        ? await apiPost<StatusResponse>("/player/status", {}, sessionId)
+        : await apiGet<StatusResponse>("/player/status", sessionId);
       setSnapshot(data);
       setLoadError(null);
     } catch (error) {

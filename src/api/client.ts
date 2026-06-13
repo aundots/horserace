@@ -7,9 +7,10 @@ function readDemoState(): string | null {
 }
 
 function demoHeaders(): Record<string, string> {
-  if (!IS_PLAY_STORE) return {};
-  const demoState = readDemoState();
-  return demoState ? { "X-Horserace-Demo-State": demoState } : {};
+  // Demo state is sent on POST bodies (_demoState). Custom headers on GET trigger
+  // CORS preflight; keep GET requests header-free until all API hosts allow
+  // X-Horserace-Demo-State.
+  return {};
 }
 
 function saveDemoState(data: unknown) {
