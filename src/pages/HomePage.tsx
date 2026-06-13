@@ -41,7 +41,8 @@ export function HomePage({
   onStartPredict,
 }: HomePageProps) {
   const toast = useToast();
-  const { isLoggedIn, loading, login, devLogin, logout } = auth;
+  const { isLoggedIn, loading, login, devLogin, demoLogin, isPlayStore, logout } =
+    auth;
   const {
     snapshot,
     loading: playerLoading,
@@ -117,9 +118,15 @@ export function HomePage({
           }
         />
         <div style={{ padding: "0 20px", display: "grid", gap: 10 }}>
-          <Button display="block" size="xlarge" onClick={login}>
-            토스로 시작하기
-          </Button>
+          {isPlayStore ? (
+            <Button display="block" size="xlarge" onClick={demoLogin}>
+              게임 체험하기
+            </Button>
+          ) : (
+            <Button display="block" size="xlarge" onClick={login}>
+              토스로 시작하기
+            </Button>
+          )}
           {showDevLogin() && (
             <Button
               display="block"

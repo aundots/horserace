@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { createSession, upsertUser } from "../db/store.js";
 import { canDevLogin } from "../lib/devAccess.js";
+import { isPlayDemoEnabled, PLAY_DEMO_USER_KEY } from "../lib/playDemo.js";
 import { exchangeAuthorizationCode, fetchLoginMe } from "../lib/tossAuth.js";
 
 export const authRouter = Router();
@@ -36,6 +37,22 @@ authRouter.post("/login", async (req, res) => {
       error instanceof Error ? error.message : "로그인에 실패했습니다.";
     res.status(502).json({ ok: false, message });
   }
+});
+
+/** Play Store IARC·내부 테스트용 — PLAY_DEMO=true 일 때만 */
+authRouter.post("/demo-login", async (_req, res) => {
+  if (!isPlayDemoEnabled()) {
+    res.status(404).json({ ok: false, message: "Not found" });
+    return;
+  }
+  await upsertUser(PLAY_DEMO_USER_KEY);
+  const session = await createSession(PLAY_DEMO_USER_KEY);
+  res.json({
+    ok: true,
+    sessionId: session.id,
+    userKey: PLAY_DEMO_USER_KEY,
+    expiresAt: session.expiresAt.toISOString(),
+  });
 });
 
 authRouter.post("/dev-login", async (req, res) => {

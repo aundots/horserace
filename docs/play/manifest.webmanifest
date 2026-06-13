@@ -1,0 +1,19 @@
+{
+  "name": "말레이스",
+  "short_name": "말레이스",
+  "description": "매일 경주·찌라시 예상·친구와 맞추기. 베팅·마권 없음.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F2F4F6",
+  "theme_color": "#3182F6",
+  "lang": "ko",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "appsintoss-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -3,6 +3,7 @@ import { useToast } from "@toss/tds-mobile";
 import { useCallback, useEffect, useState } from "react";
 import { apiGet, apiPost } from "../api/client";
 import { devUserKeyForLogin } from "../lib/devAccess";
+import { isPlayStoreBuild } from "../lib/playStore";
 
 const SESSION_KEY = "horserace.sessionId";
 
@@ -84,6 +85,20 @@ export function useAuth() {
     }
   }, [toast]);
 
+  const demoLogin = useCallback(async () => {
+    try {
+      const result = await apiPost<LoginResponse>("/auth/demo-login", {});
+      localStorage.setItem(SESSION_KEY, result.sessionId);
+      setSessionId(result.sessionId);
+      setUserKey(result.userKey);
+      toast.openToast("체험 모드로 시작했어요.", { type: "success" });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "체험 로그인에 실패했어요.";
+      toast.openToast(message, { type: "bottom" });
+    }
+  }, [toast]);
+
   const logout = useCallback(() => {
     localStorage.removeItem(SESSION_KEY);
     setSessionId(null);
@@ -97,6 +112,8 @@ export function useAuth() {
     isLoggedIn: Boolean(userKey),
     login,
     devLogin,
+    demoLogin,
+    isPlayStore: isPlayStoreBuild(),
     logout,
   };
 }

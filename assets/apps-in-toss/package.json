@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node build-brand-assets.mjs && node build-mockups.mjs && node generate-assets.mjs"
+    "build": "node build-brand-assets.mjs && node build-mockups.mjs && node generate-assets.mjs && node build-grac-screenshots.mjs"
   },
   "dependencies": {
     "puppeteer": "^24.36.1",

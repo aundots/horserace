@@ -6,6 +6,8 @@ interface ImportMetaEnv {
   readonly VITE_DEV_USER_KEY?: string;
   readonly VITE_AD_GROUP_ID?: string;
   readonly VITE_AD_DEV_MOCK?: string;
+  readonly VITE_PLAY_STORE?: string;
+  readonly VITE_BASE_PATH?: string;
 }
 
 interface ImportMeta {

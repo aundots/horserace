@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "granite dev",
+    "dev:web": "vite dev",
     "build": "ait build",
+    "build:play": "vite build --mode play",
+    "deploy:play:pages": "node scripts/deploy-play-pages.mjs",
+    "build:play:pages": "npm run build:play && npm run deploy:play:pages",
     "deploy": "ait deploy",
     "lint": "eslint .",
     "format": "prettier --write ."
