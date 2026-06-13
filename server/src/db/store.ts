@@ -1,10 +1,12 @@
 import { randomUUID } from "node:crypto";
+import {
+  createStatelessSession,
+  readStatelessSession,
+  useStatelessSessions,
+  type SessionRecord,
+} from "../lib/statelessSession.js";
 
-export type SessionRecord = {
-  id: string;
-  userKey: number;
-  expiresAt: Date;
-};
+export type { SessionRecord };
 
 const users = new Map<number, { createdAt: Date; lastLoginAt: Date }>();
 const sessions = new Map<string, SessionRecord>();
@@ -20,6 +22,10 @@ export async function upsertUser(userKey: number) {
 }
 
 export async function createSession(userKey: number, ttlHours = 24 * 7) {
+  if (useStatelessSessions()) {
+    return createStatelessSession(userKey, ttlHours);
+  }
+
   const id = randomUUID();
   const expiresAt = new Date(Date.now() + ttlHours * 60 * 60 * 1000);
   const record = { id, userKey, expiresAt };
@@ -28,6 +34,10 @@ export async function createSession(userKey: number, ttlHours = 24 * 7) {
 }
 
 export async function getSession(sessionId: string) {
+  if (useStatelessSessions()) {
+    return readStatelessSession(sessionId);
+  }
+
   const record = sessions.get(sessionId);
   if (!record) return null;
   if (record.expiresAt.getTime() < Date.now()) {
