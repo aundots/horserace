@@ -240,7 +240,11 @@ raceRouter.post("/ranked/predict", (req, res) => {
   }
   try {
     const race = setPrediction(raceId, userKey, Number(horseNumber));
-    res.json({ ok: true, raceId, prediction: race?.prediction });
+    if (!race) {
+      res.status(400).json({ ok: false, message: "경주 준비가 만료됐어요. 다시 준비해 주세요." });
+      return;
+    }
+    res.json({ ok: true, raceId, prediction: race.prediction });
   } catch (error) {
     res.status(400).json({
       ok: false,

@@ -550,3 +550,7 @@ export function getPlayerSnapshot(player: PlayerState) {
 export function getPlayerState(userKey: number) {
   return players.get(userKey) ?? null;
 }
+
+export function replacePlayerState(userKey: number, state: PlayerState) {
+  players.set(userKey, state);
+}

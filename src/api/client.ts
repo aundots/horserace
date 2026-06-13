@@ -1,4 +1,22 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000";
+const DEMO_STATE_KEY = "horserace.demoState";
+const IS_PLAY_STORE = import.meta.env.VITE_PLAY_STORE === "true";
+
+function demoHeaders(): Record<string, string> {
+  if (!IS_PLAY_STORE) return {};
+  const demoState = localStorage.getItem(DEMO_STATE_KEY);
+  return demoState ? { "X-Horserace-Demo-State": demoState } : {};
+}
+
+function saveDemoState(data: unknown) {
+  if (!IS_PLAY_STORE || !data || typeof data !== "object") return;
+  const token = (data as { demoState?: string }).demoState;
+  if (token) localStorage.setItem(DEMO_STATE_KEY, token);
+}
+
+export function clearDemoState() {
+  localStorage.removeItem(DEMO_STATE_KEY);
+}
 
 export async function apiPost<T>(
   path: string,
@@ -9,11 +27,13 @@ export async function apiPost<T>(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...demoHeaders(),
       ...(sessionId ? { "X-Session-Id": sessionId } : {}),
     },
     body: JSON.stringify(body),
   });
   const data = await res.json();
+  saveDemoState(data);
   if (!res.ok) {
     throw new Error(data?.message ?? "요청에 실패했습니다.");
   }
@@ -22,9 +42,13 @@ export async function apiPost<T>(
 
 export async function apiGet<T>(path: string, sessionId?: string | null) {
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: sessionId ? { "X-Session-Id": sessionId } : undefined,
+    headers: {
+      ...demoHeaders(),
+      ...(sessionId ? { "X-Session-Id": sessionId } : {}),
+    },
   });
   const data = await res.json();
+  saveDemoState(data);
   if (!res.ok) {
     throw new Error(data?.message ?? "요청에 실패했습니다.");
   }

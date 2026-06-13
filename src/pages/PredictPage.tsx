@@ -66,6 +66,11 @@ export function PredictPage({
     try {
       await onPredict(pick);
       await onStart();
+    } catch (error) {
+      toast.openToast(
+        error instanceof Error ? error.message : "경주를 시작할 수 없어요.",
+        { type: "bottom" },
+      );
     } finally {
       setBusy(false);
     }

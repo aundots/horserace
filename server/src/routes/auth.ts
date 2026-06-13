@@ -1,7 +1,12 @@
 import { Router } from "express";
 import { createSession, upsertUser } from "../db/store.js";
+import { getOrCreatePlayer } from "../db/playerStore.js";
 import { canDevLogin } from "../lib/devAccess.js";
 import { isPlayDemoEnabled, PLAY_DEMO_USER_KEY } from "../lib/playDemo.js";
+import {
+  attachDemoState,
+  hydrateDemoStateToken,
+} from "../lib/statelessDemoState.js";
 import { exchangeAuthorizationCode, fetchLoginMe } from "../lib/tossAuth.js";
 
 export const authRouter = Router();
@@ -46,13 +51,16 @@ authRouter.post("/demo-login", async (_req, res) => {
     return;
   }
   await upsertUser(PLAY_DEMO_USER_KEY);
+  getOrCreatePlayer(PLAY_DEMO_USER_KEY);
   const session = await createSession(PLAY_DEMO_USER_KEY);
-  res.json({
+  const body: Record<string, unknown> = {
     ok: true,
     sessionId: session.id,
     userKey: PLAY_DEMO_USER_KEY,
     expiresAt: session.expiresAt.toISOString(),
-  });
+  };
+  attachDemoState(PLAY_DEMO_USER_KEY, body);
+  res.json(body);
 });
 
 authRouter.post("/dev-login", async (req, res) => {
@@ -86,9 +94,16 @@ authRouter.get("/me", async (req, res) => {
     return;
   }
 
-  res.json({
+  if (isPlayDemoEnabled()) {
+    const demoToken = req.header("x-horserace-demo-state");
+    if (demoToken) hydrateDemoStateToken(demoToken, session.userKey);
+  }
+
+  const body: Record<string, unknown> = {
     ok: true,
     userKey: session.userKey,
     expiresAt: session.expiresAt.toISOString(),
-  });
+  };
+  if (isPlayDemoEnabled()) attachDemoState(session.userKey, body);
+  res.json(body);
 });

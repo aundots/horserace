@@ -1,6 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
 import { getSession } from "../db/store.js";
 import { getOrCreatePlayer, syncPlayerSession } from "../db/playerStore.js";
+import {
+  attachDemoState,
+  hydrateDemoStateToken,
+  isPlayDemoEnabled,
+} from "../lib/statelessDemoState.js";
 
 export type AuthedRequest = Request & {
   sessionId: string;
@@ -24,10 +29,28 @@ export async function requireSession(
     return;
   }
 
+  if (isPlayDemoEnabled()) {
+    const demoToken = req.header("x-horserace-demo-state");
+    if (demoToken) {
+      hydrateDemoStateToken(demoToken, session.userKey);
+    }
+  }
+
   const player = getOrCreatePlayer(session.userKey);
   syncPlayerSession(player);
 
   (req as AuthedRequest).sessionId = sessionId;
   (req as AuthedRequest).userKey = session.userKey;
+
+  if (isPlayDemoEnabled()) {
+    const originalJson = res.json.bind(res);
+    res.json = (body: unknown) => {
+      if (body && typeof body === "object" && !Array.isArray(body)) {
+        attachDemoState(session.userKey, body as Record<string, unknown>);
+      }
+      return originalJson(body);
+    };
+  }
+
   next();
 }

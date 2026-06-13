@@ -100,3 +100,16 @@ export function consumePreparedRace(id: string, userKey: number) {
   if (race) prepared.delete(id);
   return race;
 }
+
+export function exportPreparedForUser(userKey: number): PreparedRace[] {
+  return [...prepared.values()].filter((race) => race.userKey === userKey);
+}
+
+export function replacePreparedRacesForUser(userKey: number, races: PreparedRace[]) {
+  for (const [id, race] of prepared.entries()) {
+    if (race.userKey === userKey) prepared.delete(id);
+  }
+  for (const race of races) {
+    prepared.set(race.id, race);
+  }
+}
