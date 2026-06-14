@@ -2,7 +2,7 @@ import { Router } from "express";
 import { createSession, upsertUser } from "../db/store.js";
 import { getOrCreatePlayer } from "../db/playerStore.js";
 import { canDevLogin } from "../lib/devAccess.js";
-import { isPlayDemoEnabled, PLAY_DEMO_USER_KEY } from "../lib/playDemo.js";
+import { allocatePlayDemoUserKey, isPlayDemoEnabled } from "../lib/playDemo.js";
 import {
   attachDemoState,
   hydrateDemoStateToken,
@@ -50,16 +50,17 @@ authRouter.post("/demo-login", async (_req, res) => {
     res.status(404).json({ ok: false, message: "Not found" });
     return;
   }
-  await upsertUser(PLAY_DEMO_USER_KEY);
-  getOrCreatePlayer(PLAY_DEMO_USER_KEY);
-  const session = await createSession(PLAY_DEMO_USER_KEY);
+  const userKey = allocatePlayDemoUserKey();
+  await upsertUser(userKey);
+  getOrCreatePlayer(userKey);
+  const session = await createSession(userKey);
   const body: Record<string, unknown> = {
     ok: true,
     sessionId: session.id,
-    userKey: PLAY_DEMO_USER_KEY,
+    userKey,
     expiresAt: session.expiresAt.toISOString(),
   };
-  attachDemoState(PLAY_DEMO_USER_KEY, body);
+  attachDemoState(userKey, body);
   res.json(body);
 });
 

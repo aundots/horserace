@@ -1,5 +1,7 @@
 import type { PartyRoom } from "../db/partyStore.js";
 
+const ROOM_TTL_MS = 2 * 60 * 60 * 1000;
+
 const DATE_KEYS = new Set(["createdAt"]);
 
 function replacer(_key: string, value: unknown) {
@@ -76,13 +78,25 @@ export function partyPersistenceEnabled() {
   return Boolean(redisConfig());
 }
 
+function isRoomExpired(room: PartyRoom): boolean {
+  return Date.now() - room.createdAt.getTime() > ROOM_TTL_MS;
+}
+
 export async function loadPartyRoom(code: string): Promise<PartyRoom | null> {
   const normalized = code.toUpperCase();
   const fromRedis = await redisCommand<string>(["GET", roomKey(normalized)]);
   if (typeof fromRedis === "string") {
-    return deserializeRoom(fromRedis);
+    const room = deserializeRoom(fromRedis);
+    memoryRooms.set(normalized, room);
+    return room;
   }
-  return memoryRooms.get(normalized) ?? null;
+  const fromMemory = memoryRooms.get(normalized);
+  if (!fromMemory) return null;
+  if (isRoomExpired(fromMemory)) {
+    memoryRooms.delete(normalized);
+    return null;
+  }
+  return fromMemory;
 }
 
 export async function savePartyRoom(room: PartyRoom): Promise<void> {

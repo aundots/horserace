@@ -1,6 +1,8 @@
 import cors from "cors";
 import express from "express";
 import { config } from "./config.js";
+import { partyPersistenceEnabled } from "./lib/partyPersistence.js";
+import { isPlayDemoEnabled } from "./lib/playDemo.js";
 import { startSettlementScheduler } from "./jobs/weeklySettlement.js";
 import { adsRouter } from "./routes/ads.js";
 import { authRouter } from "./routes/auth.js";
@@ -30,7 +32,12 @@ app.use(
 app.use(express.json());
 
 app.get("/health", (_req, res) => {
-  res.json({ ok: true, app: config.appName });
+  res.json({
+    ok: true,
+    app: config.appName,
+    playDemo: isPlayDemoEnabled(),
+    partyRedis: partyPersistenceEnabled(),
+  });
 });
 
 app.use("/auth", authRouter);

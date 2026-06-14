@@ -1,6 +1,6 @@
-# Play Store 내부 테스트 → 앱인토ss 등급 (IARC)
+# Play Store 내부 테스트 → 앱인토스 등급 (IARC)
 
-GRAC 직접 심의 대신 **Google Play 내부 테스트 + IARC**로 등급 받고, 앱인토ss 콘솔에 **자체등급분류 게임물 정보**를 입력하는 경로입니다.
+GRAC 직접 심의 대신 **Google Play 내부 테스트 + IARC**로 등급 받고, 앱인토스 콘솔에 **자체등급분류 게임물 정보**를 입력하는 경로입니다.
 
 참고: [토스 — 자체등급분류 게임물 정보](https://toss.im/apps-in-toss/blog/self-rated_game_distribution)
 
@@ -19,7 +19,7 @@ Play 개발자 등록 ($25)
   → Step 4: keystore + AAB 빌드
   → Step 5: Play Console 내부 테스트 업로드 + IARC
   → GRAC「자체등급분류 게임물 조회」
-  → 앱인토ss 콘솔 게임 등급분류
+  → 앱인토스 콘솔 게임 등급분류
   → horserace .ait 검수·출시
 ```
 
@@ -28,7 +28,7 @@ Play 개발자 등록 ($25)
 ## Step 1. Google Play Console (1회)
 
 1. [Google Play Console](https://play.google.com/console) — 개발자 등록 **$25**
-2. **앱 만들기** → 게임 → **말달리자** (앱인토ss·GRAC와 **동일한 이름**)
+2. **앱 만들기** → 게임 → **말달리자** (앱인토스·GRAC와 **동일한 이름**)
 3. **패키지명:** `com.aundots.horserace` (한 번 정하면 변경 어려움)
 
 ---
@@ -81,7 +81,15 @@ Play 빌드는 `POST /auth/demo-login`으로 세션을 만듭니다. **서버에
 PLAY_DEMO=true
 SESSION_SECRET=64자_이상_랜덤
 PORT=4000
+
+# 친구 방 (서버리스·다중 인스턴스 — 권장)
+UPSTASH_REDIS_REST_URL=https://xxx.upstash.io
+UPSTASH_REDIS_REST_TOKEN=xxx
 ```
+
+`GET /health` 응답에 `partyRedis: true`이면 Redis 연동이 됩니다. 없으면 인스턴스 메모리 fallback(단일 프로세스·짧은 세션에만 안정).
+
+데모 로그인(`/auth/demo-login`)은 **세션마다 고유 userKey**(90001–99999)를 발급해 Play 체험자끼리 친구 방이 겹치지 않게 합니다.
 
 Render 등에 `server/` 배포 — 자세한 절차는 [deploy-api.md](./deploy-api.md).
 
@@ -185,7 +193,7 @@ $env:PLAY_KEY_PASSWORD = "..."
 
 ---
 
-## Step 7. 앱인토ss 콘솔
+## Step 7. 앱인토스 콘솔
 
 **게임 등급분류** 탭:
 
@@ -213,13 +221,15 @@ $env:PLAY_KEY_PASSWORD = "..."
 
 ## 체크리스트
 
+**현재 (GRAC 조회 전):** Play 웹·AAB·API(`PLAY_DEMO`)·법적 문서 준비 완료. Toss `.ait`·GRAC 조회·앱인토스 등급 입력은 GRAC/IARC 후.
+
 - [ ] Play 개발자 계정 ($25)
 - [ ] Step 2: `npm run build:play:pages` + GitHub Pages
 - [ ] Step 3: API `PLAY_DEMO=true` + `VITE_API_BASE_URL` 재빌드
 - [ ] Step 4: keystore + `app-release.aab`
 - [ ] Step 5: 내부 테스트 + IARC
 - [ ] GRAC 자체등급분류 조회
-- [ ] 앱인토ss 등급분류 + grac-screenshots
+- [ ] 앱인토스 등급분류 + grac-screenshots
 - [ ] 사업자 등록 (토스 로그인·광고 출시 전)
 
 ---

@@ -2,9 +2,15 @@
 
 ## 게임 등급분류 (GRAC)
 
-- [ ] 자체등급분류 신청 (스토어 미출시 시)
+- [ ] 자체등급분류 신청 (스토어 미출시 시) — Play IARC 완료 후 GRAC 조회
 - [ ] 이용등급·내용정보 확정
-- [ ] 게임 주요화면 2종 (GRAC용 + 앱인토스용 동일)
+- [ ] 게임 주요화면 2종 (`assets/apps-in-toss/grac-screenshots/` — `npm run build` 후 재생성)
+
+## Google Play (동시 출시)
+
+- [x] 앱명 **말달리자**, 패키지 `com.aundots.horserace`
+- [x] Play 웹 빌드 `docs/play/` (게스트 체험하기)
+- [ ] IARC + 내부 테스트 (`docs/play-internal-test.md`)
 
 ## 앱인토스 콘솔
 
