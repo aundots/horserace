@@ -14,9 +14,9 @@ GitHub Pages 활성화 후 아래 URL을 콘솔 **약관/동의문 → 서비스
 3. Branch: **main** / Folder: **/docs**
 4. Save → 1~2분 후 위 URL 접속 확인
 
-## 등록 전 필수
+## 운영자 정보
 
-`OPERATOR-INFO.md`의 사업자 정보를 약관 HTML/MD에 반영하세요.
+사업자 정보는 `OPERATOR-INFO.md`에 정리되어 있으며, 약관·개인정보처리방침(MD/HTML)에 반영되어 있습니다.
 
 ## 콘솔 입력
 

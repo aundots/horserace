@@ -1,4 +1,4 @@
-# 말레이스 (horserace)
+# 말달리자 (horserace)
 
 앱인토스 WebView 미니앱 — 매일 연습주행, 주말 랭킹 레이스.
 
@@ -34,7 +34,7 @@ npm run deploy
 | 경로 | 설명 |
 |------|------|
 | `src/` | React + TDS WebView 프론트 |
-| `granite.config.ts` | appName `horserace`, 브랜드 `말레이스` |
+| `granite.config.ts` | appName `horserace`, 브랜드 `말달리자` |
 | `assets/apps-in-toss/export/` | 콘솔 노출용 PNG·키워드 |
 | `docs/` | 기획·마케팅 문서 |
 

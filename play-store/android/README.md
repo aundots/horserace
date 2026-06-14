@@ -1,4 +1,4 @@
-# 말레이스 — Play Store Android (WebView 래퍼)
+# 말달리자 — Play Store Android (WebView 래퍼)
 
 GitHub Pages에 호스팅된 Play 웹 빌드를 WebView로 여는 Android 앱입니다.
 
@@ -36,7 +36,7 @@ keytool -genkeypair -v \
   -keystore horserace-release.jks \
   -alias horserace \
   -keyalg RSA -keysize 2048 -validity 10000 \
-  -dname "CN=말레이스, OU=Apps, O=Aundots, L=Seoul, ST=Seoul, C=KR"
+  -dname "CN=말달리자, OU=Apps, O=Aundots, L=Seoul, ST=Seoul, C=KR"
 ```
 
 **SHA256 지문** (TWA `assetlinks.json`용):

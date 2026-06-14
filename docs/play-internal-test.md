@@ -28,7 +28,7 @@ Play 개발자 등록 ($25)
 ## Step 1. Google Play Console (1회)
 
 1. [Google Play Console](https://play.google.com/console) — 개발자 등록 **$25**
-2. **앱 만들기** → 게임 → **말레이스** (앱인토ss·GRAC와 **동일한 이름**)
+2. **앱 만들기** → 게임 → **말달리자** (앱인토ss·GRAC와 **동일한 이름**)
 3. **패키지명:** `com.aundots.horserace` (한 번 정하면 변경 어려움)
 
 ---
@@ -113,7 +113,7 @@ keytool -genkeypair -v \
   -keystore play-store/horserace-release.jks \
   -alias horserace \
   -keyalg RSA -keysize 2048 -validity 10000 \
-  -dname "CN=말레이스, OU=Apps, O=Aundots, L=Seoul, ST=Seoul, C=KR"
+  -dname "CN=말달리자, OU=Apps, O=Aundots, L=Seoul, ST=Seoul, C=KR"
 ```
 
 **SHA256 지문** (TWA용, 선택):
@@ -148,7 +148,7 @@ $env:PLAY_KEY_PASSWORD = "..."
 3. **앱 콘텐츠 → 등급 (IARC)** 설문 완료
 4. 심사·승인 후 IARC 등급 확정
 
-### IARC 설문 (말레이스)
+### IARC 설문 (말달리자)
 
 | 질문 유형 | 답변 방향 |
 |-----------|-----------|
@@ -165,7 +165,7 @@ $env:PLAY_KEY_PASSWORD = "..."
 
 | 항목 | 값 |
 |------|-----|
-| 앱 이름 | 말레이스 |
+| 앱 이름 | 말달리자 |
 | 짧은 설명 | 매일 경주·찌라시 예상·친구와 맞추기 |
 | 그래픽 | `assets/apps-in-toss/export/` |
 | 카테고리 | 게임 → 스포츠 또는 레이싱 |
@@ -247,7 +247,7 @@ $env:PLAY_KEY_PASSWORD = "..."
 
 ### Play Console — upload now
 
-1. [Google Play Console](https://play.google.com/console) → **말레이스** (`com.aundots.horserace`)
+1. [Google Play Console](https://play.google.com/console) → **말달리자** (`com.aundots.horserace`)
 2. **Testing** → **Internal testing** → **Create new release**
 3. **Upload** → select `app-release.aab` (path above)
 4. **Release notes** → save → **Review release** → **Start rollout to Internal testing**
