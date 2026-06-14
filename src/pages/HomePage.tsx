@@ -100,7 +100,7 @@ export function HomePage({
   if (loading || (isLoggedIn && playerLoading && !snapshot)) {
     return (
       <Top
-        title={<Top.TitleParagraph size={22}>말레이스</Top.TitleParagraph>}
+        title={<Top.TitleParagraph size={22}>말달리자</Top.TitleParagraph>}
         subtitleBottom={
           <Top.SubtitleParagraph size={15}>불러오는 중...</Top.SubtitleParagraph>
         }
@@ -112,7 +112,7 @@ export function HomePage({
     return (
       <>
         <Top
-          title={<Top.TitleParagraph size={22}>말레이스</Top.TitleParagraph>}
+          title={<Top.TitleParagraph size={22}>말달리자</Top.TitleParagraph>}
           subtitleBottom={
             <Top.SubtitleParagraph size={15}>
               {loadError ?? "게임 정보를 불러오지 못했어요."}
@@ -156,7 +156,7 @@ export function HomePage({
     return (
       <>
         <Top
-          title={<Top.TitleParagraph size={22}>말레이스</Top.TitleParagraph>}
+          title={<Top.TitleParagraph size={22}>말달리자</Top.TitleParagraph>}
           subtitleBottom={
             <Top.SubtitleParagraph size={15}>
               매일 경주 · 찌라시 · 예상
@@ -198,7 +198,7 @@ export function HomePage({
   return (
     <>
       <Top
-        title={<Top.TitleParagraph size={22}>말레이스</Top.TitleParagraph>}
+        title={<Top.TitleParagraph size={22}>말달리자</Top.TitleParagraph>}
         subtitleBottom={
           <Top.SubtitleParagraph size={15}>찌라시 열고 1착을 맞혀보세요</Top.SubtitleParagraph>
         }

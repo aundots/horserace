@@ -3,7 +3,7 @@ import { defineConfig } from "@apps-in-toss/web-framework/config";
 export default defineConfig({
   appName: "horserace",
   brand: {
-    displayName: "말레이스",
+    displayName: "말달리자",
     primaryColor: "#3182F6",
     icon: "",
   },

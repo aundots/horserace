@@ -14,7 +14,10 @@ export function TDSMobileAITProvider({
   return (
     <PlayToastProvider>
       <div className="play-shell" style={{ ["--brand-primary" as string]: brandPrimaryColor }}>
-        {children}
+        <div className="app-top-chrome" aria-hidden>
+          <div className="app-top-banner-slot" id="app-top-banner-slot" />
+        </div>
+        <div className="play-shell__main">{children}</div>
       </div>
     </PlayToastProvider>
   );

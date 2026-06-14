@@ -1,5 +1,13 @@
 :root {
   font-family: sans-serif;
+  --app-safe-top-fallback: 0px;
+  --app-top-banner-height: 0px;
+}
+
+html.play-store {
+  /* WebView often reports safe-area 0 — reserve status bar + future banner slot */
+  --app-safe-top-fallback: 44px;
+  --app-safe-right-fallback: 0px;
 }
 
 * {
@@ -10,6 +18,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 @media (min-width: 481px) {

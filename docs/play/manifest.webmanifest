@@ -1,6 +1,6 @@
 {
-  "name": "말레이스",
-  "short_name": "말레이스",
+  "name": "말달리자",
+  "short_name": "말달리자",
   "description": "매일 경주·찌라시 예상·친구와 맞추기. 베팅·마권 없음.",
   "start_url": "./",
   "display": "standalone",
