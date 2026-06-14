@@ -13,7 +13,7 @@ import {
 export const RACE_DURATION_MS = 56_000;
 
 /** 순위 간 전후 간격 (m) — 대각선 일렬 방지 */
-const PACK_GAP_M = 2.2;
+const PACK_GAP_M = 3.4;
 const SPREAD_RAMP_END = 0.18;
 const GATE_BLEND_END = 0.08;
 
@@ -106,7 +106,7 @@ export function buildInterpolatedHorses(
   const spreadFactor = startSpreadFactor(p);
   const gateRemaining = raceDistance;
   const count = horseNumbers.length;
-  const jitterFade = 1 - p * 0.65;
+  const jitterFade = 1 - p * 0.45;
 
   return horseNumbers.map((number) => {
     const rank0 = frame0.ranks.indexOf(number);
@@ -117,7 +117,7 @@ export function buildInterpolatedHorses(
     const jitterM = horseAlongJitter(number) * jitterFade;
     const racedRemaining = Math.max(0, baseRemaining - rankOffsetM + jitterM);
     const metersRem = metersState
-      ? smoothMetersRemaining(number, blendMetersRemaining(p, racedRemaining, gateRemaining), metersState)
+      ? smoothMetersRemaining(number, blendMetersRemaining(p, racedRemaining, gateRemaining), metersState, 0.28)
       : blendMetersRemaining(p, racedRemaining, gateRemaining);
     const targetLateral = racingLateralTarget(number, rankIdx, count, p);
     const lateralT = lateralState

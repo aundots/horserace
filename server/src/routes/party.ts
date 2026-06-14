@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, type Response } from "express";
 import { getOrCreatePlayer } from "../db/playerStore.js";
 import {
   createParty,
@@ -19,19 +19,40 @@ export const partyRouter = Router();
 
 partyRouter.use(requireSession);
 
-partyRouter.get("/mine", (req, res) => {
-  const { userKey } = req as AuthedRequest;
-  const room = getPartyForUser(userKey);
+function partyCodeFromBody(body: unknown): string | undefined {
+  if (!body || typeof body !== "object") return undefined;
+  const code = (body as { partyCode?: string }).partyCode;
+  return code ? String(code).toUpperCase() : undefined;
+}
+
+async function respondParty(
+  res: Response,
+  room: Awaited<ReturnType<typeof getPartyForUser>>,
+  userKey: number,
+) {
   if (!room) {
     res.json({ ok: true, party: null });
     return;
   }
   res.json({ ok: true, party: serializeParty(room, userKey) });
+}
+
+partyRouter.get("/mine", async (req, res) => {
+  const { userKey } = req as AuthedRequest;
+  const room = await getPartyForUser(userKey);
+  await respondParty(res, room, userKey);
 });
 
-partyRouter.get("/:code", (req, res) => {
+partyRouter.post("/mine", async (req, res) => {
+  const { userKey } = req as AuthedRequest;
+  const partyCode = partyCodeFromBody(req.body);
+  const room = await getPartyForUser(userKey, partyCode);
+  await respondParty(res, room, userKey);
+});
+
+partyRouter.get("/:code", async (req, res) => {
   const { userKey } = req as unknown as AuthedRequest;
-  const room = getParty(req.params.code);
+  const room = await getParty(req.params.code);
   if (!room) {
     res.status(404).json({ ok: false, message: "방을 찾을 수 없어요." });
     return;
@@ -39,14 +60,14 @@ partyRouter.get("/:code", (req, res) => {
   res.json({ ok: true, party: serializeParty(room, userKey) });
 });
 
-partyRouter.post("/create", (req, res) => {
+partyRouter.post("/create", async (req, res) => {
   const { userKey } = req as AuthedRequest;
   const { displayName } = req.body ?? {};
-  const room = createParty(userKey, displayName);
+  const room = await createParty(userKey, displayName);
   res.json({ ok: true, party: serializeParty(room, userKey) });
 });
 
-partyRouter.post("/join", (req, res) => {
+partyRouter.post("/join", async (req, res) => {
   const { userKey } = req as AuthedRequest;
   const { code, displayName } = req.body ?? {};
   if (!code) {
@@ -54,7 +75,7 @@ partyRouter.post("/join", (req, res) => {
     return;
   }
   try {
-    const room = joinParty(userKey, String(code), displayName);
+    const room = await joinParty(userKey, String(code), displayName);
     res.json({ ok: true, party: serializeParty(room, userKey) });
   } catch (error) {
     res.status(400).json({
@@ -64,21 +85,26 @@ partyRouter.post("/join", (req, res) => {
   }
 });
 
-partyRouter.post("/leave", (req, res) => {
+partyRouter.post("/leave", async (req, res) => {
   const { userKey } = req as AuthedRequest;
-  leaveParty(userKey);
+  await leaveParty(userKey);
   res.json({ ok: true });
 });
 
-partyRouter.post("/prepare", (req, res) => {
+partyRouter.post("/prepare", async (req, res) => {
   const { userKey } = req as AuthedRequest;
   const player = getOrCreatePlayer(userKey);
+  const partyCode = partyCodeFromBody(req.body);
   try {
-    const room = prepareParty(userKey, {
-      speed: player.horse.speed,
-      stamina: player.horse.stamina,
-      accel: player.horse.accel,
-    });
+    const room = await prepareParty(
+      userKey,
+      {
+        speed: player.horse.speed,
+        stamina: player.horse.stamina,
+        accel: player.horse.accel,
+      },
+      partyCode,
+    );
     res.json({ ok: true, party: serializeParty(room, userKey) });
   } catch (error) {
     res.status(400).json({
@@ -88,15 +114,16 @@ partyRouter.post("/prepare", (req, res) => {
   }
 });
 
-partyRouter.post("/predict", (req, res) => {
+partyRouter.post("/predict", async (req, res) => {
   const { userKey } = req as AuthedRequest;
   const { horseNumber } = req.body ?? {};
+  const partyCode = partyCodeFromBody(req.body);
   if (!horseNumber) {
     res.status(400).json({ ok: false, message: "horseNumber가 필요해요." });
     return;
   }
   try {
-    const room = setPartyPrediction(userKey, Number(horseNumber));
+    const room = await setPartyPrediction(userKey, Number(horseNumber), partyCode);
     res.json({ ok: true, party: serializeParty(room, userKey) });
   } catch (error) {
     res.status(400).json({
@@ -106,15 +133,16 @@ partyRouter.post("/predict", (req, res) => {
   }
 });
 
-partyRouter.post("/reveal-tip", (req, res) => {
+partyRouter.post("/reveal-tip", async (req, res) => {
   const { userKey } = req as AuthedRequest;
   const { horseNumber } = req.body ?? {};
+  const partyCode = partyCodeFromBody(req.body);
   if (!horseNumber) {
     res.status(400).json({ ok: false, message: "horseNumber가 필요해요." });
     return;
   }
   try {
-    const result = revealPartyTip(userKey, Number(horseNumber));
+    const result = await revealPartyTip(userKey, Number(horseNumber), partyCode);
     res.json({
       ok: true,
       party: serializeParty(result.room, userKey),
@@ -129,10 +157,11 @@ partyRouter.post("/reveal-tip", (req, res) => {
   }
 });
 
-partyRouter.post("/run", (req, res) => {
+partyRouter.post("/run", async (req, res) => {
   const { userKey } = req as AuthedRequest;
+  const partyCode = partyCodeFromBody(req.body);
   try {
-    const room = runPartyRace(userKey);
+    const room = await runPartyRace(userKey, partyCode);
     res.json({ ok: true, party: serializeParty(room, userKey) });
   } catch (error) {
     res.status(400).json({

@@ -257,8 +257,8 @@ export function gateLateralT(horseNumber: number): number {
 /** 주행 중 목표 가로 위치 — 순위와 분리, 말 번호·주행 리듬 기반 */
 export function racingLateralTarget(
   horseNumber: number,
-  _rankIdx: number,
-  _count: number,
+  rankIdx: number,
+  count: number,
   raceProgress: number,
 ): number {
   const gate = gateLateralT(horseNumber);
@@ -266,6 +266,12 @@ export function racingLateralTarget(
   let target = 0.1 + seed * 0.8;
   target += Math.sin(raceProgress * 2.6 + horseNumber * 1.15) * 0.05;
   target += Math.cos(raceProgress * 5.2 + horseNumber * 0.55) * 0.025;
+
+  if (count > 1 && raceProgress > 0.12) {
+    const rankLane = 0.1 + (rankIdx / (count - 1)) * 0.8;
+    const spreadBlend = Math.min(1, (raceProgress - 0.12) / 0.22) * 0.3;
+    target = target * (1 - spreadBlend) + rankLane * spreadBlend;
+  }
 
   if (raceProgress < 0.12) {
     const blend = raceProgress / 0.12;
@@ -652,7 +658,7 @@ export function getFinishLineRect(layout: OvalLayout, compact = false) {
   const maxX = Math.max(line.x1, line.x2) + thickness;
   const minY = Math.min(line.y1, line.y2) - thickness;
   const maxY = Math.max(line.y1, line.y2) + thickness;
-  const labelOff = compact ? 8 : 14;
+  const labelOff = compact ? 10 : 20;
   return {
     x: minX,
     y: minY,

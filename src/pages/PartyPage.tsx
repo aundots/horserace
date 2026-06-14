@@ -13,6 +13,7 @@ const TRACK_LABEL: Record<string, string> = {
 
 interface PartyPageProps {
   party: PartySnapshot | null;
+  initialJoinCode?: string;
   onRefresh: () => Promise<PartySnapshot | null>;
   onCreate: (displayName?: string) => Promise<PartySnapshot>;
   onJoin: (code: string, displayName?: string) => Promise<PartySnapshot>;
@@ -66,6 +67,7 @@ function Scoreboard({ party }: { party: PartySnapshot }) {
 
 export function PartyPage({
   party: initialParty,
+  initialJoinCode,
   onRefresh,
   onCreate,
   onJoin,
@@ -79,7 +81,7 @@ export function PartyPage({
 }: PartyPageProps) {
   const toast = useToast();
   const [party, setParty] = useState<PartySnapshot | null>(initialParty);
-  const [joinCode, setJoinCode] = useState("");
+  const [joinCode, setJoinCode] = useState(initialJoinCode ?? "");
   const [nick, setNick] = useState("");
   const [pick, setPick] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
@@ -146,12 +148,23 @@ export function PartyPage({
     }
   }
 
+  useEffect(() => {
+    if (initialJoinCode) setJoinCode(initialJoinCode.toUpperCase());
+  }, [initialJoinCode]);
+
   async function copyCode() {
+    const base = `${window.location.origin}${import.meta.env.BASE_URL}`.replace(/\/$/, "");
+    const inviteUrl = `${base}/?party=${party!.code}`;
     try {
-      await navigator.clipboard.writeText(party!.code);
-      toast.openToast("방 코드를 복사했어요", { type: "success" });
+      await navigator.clipboard.writeText(inviteUrl);
+      toast.openToast("초대 링크를 복사했어요", { type: "success" });
     } catch {
-      toast.openToast(`코드: ${party!.code}`, { type: "bottom" });
+      try {
+        await navigator.clipboard.writeText(party!.code);
+        toast.openToast(`코드: ${party!.code}`, { type: "bottom" });
+      } catch {
+        toast.openToast(`코드: ${party!.code}`, { type: "bottom" });
+      }
     }
   }
 
@@ -279,7 +292,7 @@ export function PartyPage({
             <strong>3장</strong> · 같은 말 중복 불가 · {formatScoreRules()}
           </p>
           <Button display="block" size="large" color="dark" variant="weak" onClick={copyCode}>
-            방 코드 복사 · 친구에게 공유
+            초대 링크 복사 · 친구에게 공유
           </Button>
           {party.isHost && (
             <Button

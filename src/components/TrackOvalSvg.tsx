@@ -292,9 +292,9 @@ export function TrackOvalSvg({ layout, track, compact = false, raceDistance }: T
       {!compact && (
         <>
           <text
-            x={finishLine.mx + finishLine.tx * 16}
-            y={finishLine.my + finishLine.ty * 16 + 4}
-            textAnchor="middle"
+            x={finishLine.mx + finishLine.tx * 26}
+            y={finishLine.my + finishLine.ty * 26 + 4}
+            textAnchor="start"
             fill="rgba(255,255,255,0.9)"
             fontSize={9}
             fontWeight={700}

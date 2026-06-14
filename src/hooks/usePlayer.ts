@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { apiGet, apiPost } from "../api/client";
+import { apiGet, apiPost, clearPartyCode, savePartyCode } from "../api/client";
 import { isPlayStoreBuild } from "../lib/playStore";
 import type { HorseDraft } from "../lib/horseBuild";
 import type {
@@ -269,10 +269,18 @@ export function usePlayer(sessionId: string | null) {
 
   const fetchParty = useCallback(async () => {
     if (!sessionId) return null;
-    const data = await apiGet<{ ok: boolean; party: PartySnapshot | null }>(
-      "/party/mine",
-      sessionId,
-    );
+    const data = isPlayStoreBuild()
+      ? await apiPost<{ ok: boolean; party: PartySnapshot | null }>(
+          "/party/mine",
+          {},
+          sessionId,
+        )
+      : await apiGet<{ ok: boolean; party: PartySnapshot | null }>(
+          "/party/mine",
+          sessionId,
+        );
+    if (data.party) savePartyCode(data.party.code);
+    else clearPartyCode();
     return data.party;
   }, [sessionId]);
 
@@ -284,6 +292,7 @@ export function usePlayer(sessionId: string | null) {
         { displayName },
         sessionId,
       );
+      savePartyCode(data.party.code);
       return data.party;
     },
     [sessionId],
@@ -297,6 +306,7 @@ export function usePlayer(sessionId: string | null) {
         { code, displayName },
         sessionId,
       );
+      savePartyCode(data.party.code);
       return data.party;
     },
     [sessionId],
@@ -305,6 +315,7 @@ export function usePlayer(sessionId: string | null) {
   const leaveParty = useCallback(async () => {
     if (!sessionId) return;
     await apiPost("/party/leave", {}, sessionId);
+    clearPartyCode();
   }, [sessionId]);
 
   const prepareParty = useCallback(async () => {

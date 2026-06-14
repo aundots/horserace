@@ -1,5 +1,13 @@
 import { randomInt } from "node:crypto";
 import type { JockeyInfo } from "../lib/jockey.js";
+import {
+  clearUserPartyCode,
+  deletePartyRoom,
+  loadPartyRoom,
+  loadUserPartyCode,
+  savePartyRoom,
+  saveUserPartyCode,
+} from "../lib/partyPersistence.js";
 import type { RaceEvent } from "../lib/raceSim.js";
 import { PARTY_TIPS_PER_RACE, placePoints } from "../lib/partyScoring.js";
 import { buildEntrants, buildRaceField } from "../lib/raceField.js";
@@ -56,19 +64,17 @@ export type PartyRoom = {
   createdAt: Date;
 };
 
-const rooms = new Map<string, PartyRoom>();
-const userParty = new Map<number, string>();
-
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const MAX_MEMBERS = 8;
 const TTL_MS = 2 * 60 * 60 * 1000;
 
-function genCode(): string {
+async function genCode(): Promise<string> {
   let code = "";
   for (let i = 0; i < 6; i++) {
     code += CODE_CHARS[randomInt(CODE_CHARS.length)];
   }
-  return rooms.has(code) ? genCode() : code;
+  const existing = await loadPartyRoom(code);
+  return existing ? genCode() : code;
 }
 
 function defaultName(userKey: number) {
@@ -85,13 +91,18 @@ function newMember(userKey: number, displayName?: string): PartyMember {
   };
 }
 
-function purgeExpired() {
-  const now = Date.now();
-  for (const [code, room] of rooms) {
-    if (now - room.createdAt.getTime() > TTL_MS) {
-      for (const m of room.members) userParty.delete(m.userKey);
-      rooms.delete(code);
-    }
+async function purgeExpired() {
+  // Redis TTL handles expiry; memory entries are checked on load.
+}
+
+function isExpired(room: PartyRoom) {
+  return Date.now() - room.createdAt.getTime() > TTL_MS;
+}
+
+async function persistRoom(room: PartyRoom) {
+  await savePartyRoom(room);
+  for (const member of room.members) {
+    await saveUserPartyCode(member.userKey, room.code);
   }
 }
 
@@ -158,12 +169,12 @@ export function serializeParty(room: PartyRoom, viewerKey: number) {
   };
 }
 
-export function createParty(userKey: number, displayName?: string) {
-  purgeExpired();
-  const existing = userParty.get(userKey);
-  if (existing) leaveParty(userKey);
+export async function createParty(userKey: number, displayName?: string) {
+  await purgeExpired();
+  const existingCode = await loadUserPartyCode(userKey);
+  if (existingCode) await leaveParty(userKey);
 
-  const code = genCode();
+  const code = await genCode();
   const room: PartyRoom = {
     code,
     hostUserKey: userKey,
@@ -177,61 +188,81 @@ export function createParty(userKey: number, displayName?: string) {
     clientResult: null,
     createdAt: new Date(),
   };
-  rooms.set(code, room);
-  userParty.set(userKey, code);
+  await persistRoom(room);
   return room;
 }
 
-export function joinParty(userKey: number, code: string, displayName?: string) {
-  purgeExpired();
-  const room = rooms.get(code.toUpperCase());
-  if (!room) throw new Error("방 코드를 찾을 수 없어요.");
+export async function joinParty(userKey: number, code: string, displayName?: string) {
+  await purgeExpired();
+  const normalized = code.toUpperCase().trim();
+  const room = await loadPartyRoom(normalized);
+  if (!room || isExpired(room)) {
+    await deletePartyRoom(normalized);
+    throw new Error("방 코드를 찾을 수 없어요.");
+  }
   if (room.status !== "waiting") throw new Error("이미 시작된 방이에요.");
   if (room.members.length >= MAX_MEMBERS) throw new Error("방이 가득 찼어요.");
 
-  const existing = userParty.get(userKey);
-  if (existing && existing !== room.code) leaveParty(userKey);
+  const existingCode = await loadUserPartyCode(userKey);
+  if (existingCode && existingCode !== room.code) await leaveParty(userKey);
 
   if (!room.members.some((m) => m.userKey === userKey)) {
     room.members.push(newMember(userKey, displayName));
   }
-  userParty.set(userKey, room.code);
+  await persistRoom(room);
   return room;
 }
 
-export function leaveParty(userKey: number) {
-  const code = userParty.get(userKey);
+export async function leaveParty(userKey: number) {
+  const code = await loadUserPartyCode(userKey);
   if (!code) return;
-  const room = rooms.get(code);
+  const room = await loadPartyRoom(code);
   if (!room) {
-    userParty.delete(userKey);
+    await clearUserPartyCode(userKey);
     return;
   }
   room.members = room.members.filter((m) => m.userKey !== userKey);
-  userParty.delete(userKey);
+  await clearUserPartyCode(userKey);
   if (room.members.length === 0) {
-    rooms.delete(code);
+    await deletePartyRoom(code);
     return;
   }
   if (room.hostUserKey === userKey) {
     room.hostUserKey = room.members[0]!.userKey;
   }
+  await persistRoom(room);
 }
 
-export function getPartyForUser(userKey: number) {
-  purgeExpired();
-  const code = userParty.get(userKey);
+export async function getPartyForUser(userKey: number, partyCode?: string) {
+  await purgeExpired();
+  const code = partyCode?.toUpperCase() ?? (await loadUserPartyCode(userKey));
   if (!code) return null;
-  return rooms.get(code) ?? null;
+  const room = await loadPartyRoom(code);
+  if (!room || isExpired(room)) {
+    await deletePartyRoom(code);
+    await clearUserPartyCode(userKey);
+    return null;
+  }
+  if (!room.members.some((m) => m.userKey === userKey)) return null;
+  return room;
 }
 
-export function getParty(code: string) {
-  purgeExpired();
-  return rooms.get(code.toUpperCase()) ?? null;
+export async function getParty(code: string) {
+  await purgeExpired();
+  const room = await loadPartyRoom(code.toUpperCase());
+  if (!room || isExpired(room)) {
+    if (room) await deletePartyRoom(room.code);
+    return null;
+  }
+  return room;
 }
 
-export function prepareParty(userKey: number, anchor: { speed: number; stamina: number; accel: number }) {
-  const room = getPartyForUser(userKey);
+export async function prepareParty(
+  userKey: number,
+  anchor: { speed: number; stamina: number; accel: number },
+  partyCode?: string,
+) {
+  const room = await getPartyForUser(userKey, partyCode);
   if (!room) throw new Error("참여 중인 방이 없어요.");
   if (room.hostUserKey !== userKey) throw new Error("방장만 경주를 준비할 수 있어요.");
   if (room.status !== "waiting" && room.status !== "done") {
@@ -254,11 +285,16 @@ export function prepareParty(userKey: number, anchor: { speed: number; stamina: 
     m.revealedTips = [];
   }
   room.clientResult = null;
+  await persistRoom(room);
   return room;
 }
 
-export function setPartyPrediction(userKey: number, horseNumber: number) {
-  const room = getPartyForUser(userKey);
+export async function setPartyPrediction(
+  userKey: number,
+  horseNumber: number,
+  partyCode?: string,
+) {
+  const room = await getPartyForUser(userKey, partyCode);
   if (!room) throw new Error("참여 중인 방이 없어요.");
   if (room.status !== "picking") throw new Error("지금은 선택할 수 없어요.");
 
@@ -278,11 +314,16 @@ export function setPartyPrediction(userKey: number, horseNumber: number) {
   }
 
   member.prediction = num;
+  await persistRoom(room);
   return room;
 }
 
-export function revealPartyTip(userKey: number, horseNumber: number) {
-  const room = getPartyForUser(userKey);
+export async function revealPartyTip(
+  userKey: number,
+  horseNumber: number,
+  partyCode?: string,
+) {
+  const room = await getPartyForUser(userKey, partyCode);
   if (!room) throw new Error("참여 중인 방이 없어요.");
   if (room.status !== "picking") throw new Error("지금은 찌라시를 볼 수 없어요.");
 
@@ -302,11 +343,12 @@ export function revealPartyTip(userKey: number, horseNumber: number) {
   }
 
   member.revealedTips.push(num);
+  await persistRoom(room);
   return { room, tip, already: false };
 }
 
-export function runPartyRace(userKey: number) {
-  const room = getPartyForUser(userKey);
+export async function runPartyRace(userKey: number, partyCode?: string) {
+  const room = await getPartyForUser(userKey, partyCode);
   if (!room) throw new Error("참여 중인 방이 없어요.");
   if (room.hostUserKey !== userKey) throw new Error("방장만 경주를 시작할 수 있어요.");
   if (room.status !== "picking") throw new Error("아직 선택 단계가 아니에요.");
@@ -371,5 +413,6 @@ export function runPartyRace(userKey: number) {
   for (const m of room.members) {
     m.prediction = null;
   }
+  await persistRoom(room);
   return room;
 }

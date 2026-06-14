@@ -1,7 +1,7 @@
 import { appLogin } from "@apps-in-toss/web-framework";
 import { useToast } from "@toss/tds-mobile";
 import { useCallback, useEffect, useState } from "react";
-import { apiGet, apiPost, clearDemoState } from "../api/client";
+import { apiGet, apiPost, clearDemoState, clearPartyCode } from "../api/client";
 import { devUserKeyForLogin } from "../lib/devAccess";
 import { isPlayStoreBuild } from "../lib/playStore";
 
@@ -103,6 +103,7 @@ export function useAuth() {
   const logout = useCallback(() => {
     localStorage.removeItem(SESSION_KEY);
     clearDemoState();
+    clearPartyCode();
     setSessionId(null);
     setUserKey(null);
   }, []);

@@ -1,9 +1,26 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000";
 const DEMO_STATE_KEY = "horserace.demoState";
+const PARTY_CODE_KEY = "horserace.partyCode";
 const IS_PLAY_STORE = import.meta.env.VITE_PLAY_STORE === "true";
 
 function readDemoState(): string | null {
   return localStorage.getItem(DEMO_STATE_KEY);
+}
+
+export function readPartyCode(): string | null {
+  return localStorage.getItem(PARTY_CODE_KEY);
+}
+
+export function savePartyCode(code: string | null | undefined) {
+  if (!code) {
+    localStorage.removeItem(PARTY_CODE_KEY);
+    return;
+  }
+  localStorage.setItem(PARTY_CODE_KEY, code.toUpperCase());
+}
+
+export function clearPartyCode() {
+  localStorage.removeItem(PARTY_CODE_KEY);
 }
 
 function demoHeaders(): Record<string, string> {
@@ -23,21 +40,25 @@ export function clearDemoState() {
   localStorage.removeItem(DEMO_STATE_KEY);
 }
 
+function withPlayPayload(body: unknown): unknown {
+  if (!IS_PLAY_STORE) return body;
+  const base =
+    body && typeof body === "object" && body !== null
+      ? { ...(body as Record<string, unknown>) }
+      : {};
+  const demoState = readDemoState();
+  if (demoState) base._demoState = demoState;
+  const partyCode = readPartyCode();
+  if (partyCode) base.partyCode = partyCode;
+  return base;
+}
+
 export async function apiPost<T>(
   path: string,
   body: unknown,
   sessionId?: string | null,
 ): Promise<T> {
-  const demoState = readDemoState();
-  const requestBody =
-    IS_PLAY_STORE && demoState
-      ? {
-          ...(body && typeof body === "object" && body !== null
-            ? (body as Record<string, unknown>)
-            : {}),
-          _demoState: demoState,
-        }
-      : body;
+  const requestBody = withPlayPayload(body);
 
   const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
