@@ -6,7 +6,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 
 export const config = {
   port: Number(process.env.PORT ?? 4000),
-  appName: process.env.APP_NAME ?? "horserace",
+  appName: process.env.APP_NAME ?? "horserun",
   sessionSecret: process.env.SESSION_SECRET ?? "dev-change-me",
   databaseUrl: process.env.DATABASE_URL ?? "",
   mtls: {
@@ -29,7 +29,7 @@ export const config = {
     ...(process.env.CORS_ORIGINS?.split(",")
       .map((origin) => origin.trim())
       .filter(Boolean) ?? []),
-    `https://${process.env.APP_NAME ?? "horserace"}.private-apps.tossmini.com`,
-    `https://${process.env.APP_NAME ?? "horserace"}.apps.tossmini.com`,
+    `https://${process.env.APP_NAME ?? "horserun"}.private-apps.tossmini.com`,
+    `https://${process.env.APP_NAME ?? "horserun"}.apps.tossmini.com`,
   ],
 };

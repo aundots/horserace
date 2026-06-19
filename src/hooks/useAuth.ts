@@ -35,7 +35,9 @@ export function useAuth() {
         return;
       }
       try {
-        const me = await apiGet<MeResponse>("/auth/me", sessionId);
+        const me = isPlayStoreBuild()
+          ? await apiPost<MeResponse>("/auth/me", {}, sessionId)
+          : await apiGet<MeResponse>("/auth/me", sessionId);
         if (!cancelled) setUserKey(me.userKey);
       } catch {
         localStorage.removeItem(SESSION_KEY);

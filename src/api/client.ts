@@ -60,14 +60,19 @@ export async function apiPost<T>(
 ): Promise<T> {
   const requestBody = withPlayPayload(body);
 
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(sessionId ? { "X-Session-Id": sessionId } : {}),
-    },
-    body: JSON.stringify(requestBody),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(sessionId ? { "X-Session-Id": sessionId } : {}),
+      },
+      body: JSON.stringify(requestBody),
+    });
+  } catch {
+    throw new Error("서버에 연결할 수 없어요. 네트워크를 확인해 주세요.");
+  }
   const data = await res.json();
   saveDemoState(data);
   if (!res.ok) {
@@ -77,12 +82,17 @@ export async function apiPost<T>(
 }
 
 export async function apiGet<T>(path: string, sessionId?: string | null) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: {
-      ...demoHeaders(),
-      ...(sessionId ? { "X-Session-Id": sessionId } : {}),
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${path}`, {
+      headers: {
+        ...demoHeaders(),
+        ...(sessionId ? { "X-Session-Id": sessionId } : {}),
+      },
+    });
+  } catch {
+    throw new Error("서버에 연결할 수 없어요. 네트워크를 확인해 주세요.");
+  }
   const data = await res.json();
   saveDemoState(data);
   if (!res.ok) {

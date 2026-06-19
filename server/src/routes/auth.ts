@@ -81,7 +81,10 @@ authRouter.post("/dev-login", async (req, res) => {
   });
 });
 
-authRouter.get("/me", async (req, res) => {
+authRouter.get("/me", meHandler);
+authRouter.post("/me", meHandler);
+
+async function meHandler(req: import("express").Request, res: import("express").Response) {
   const sessionId = req.header("x-session-id");
   if (!sessionId) {
     res.status(401).json({ ok: false, message: "세션이 없습니다." });
@@ -96,7 +99,10 @@ authRouter.get("/me", async (req, res) => {
   }
 
   if (isPlayDemoEnabled()) {
-    const demoToken = req.header("x-horserace-demo-state");
+    let demoToken = req.header("x-horserace-demo-state");
+    if (!demoToken && req.body && typeof req.body._demoState === "string") {
+      demoToken = req.body._demoState;
+    }
     if (demoToken) hydrateDemoStateToken(demoToken, session.userKey);
   }
 
@@ -107,4 +113,4 @@ authRouter.get("/me", async (req, res) => {
   };
   if (isPlayDemoEnabled()) attachDemoState(session.userKey, body);
   res.json(body);
-});
+}
