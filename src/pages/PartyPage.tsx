@@ -182,8 +182,8 @@ export function PartyPage({
         <div style={{ padding: "0 20px", display: "grid", gap: 12 }}>
           <TextField
             variant="box"
-            label="닉네임 (선택)"
-            placeholder="술자리에서 보일 이름"
+            label="닉네임"
+            placeholder="닉네임 입력"
             value={nick}
             onChange={(e) => setNick(e.target.value)}
           />
