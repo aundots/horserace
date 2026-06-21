@@ -10,6 +10,8 @@ export type CommentaryContext = {
   started: boolean;
   finished: boolean;
   keyframe: RaceKeyframe;
+  /** 트랙·전광판과 동일한 실시간 순위 (말 번호 배열, 1착→8착) */
+  liveRanks?: number[];
   entrantMap: Map<number, { name: string; pace?: string }>;
   pickedNumber: number | null;
   distance: number;
@@ -46,11 +48,12 @@ function nameOf(
 
 function pickedRank(ctx: CommentaryContext): number {
   if (!ctx.pickedNumber) return 8;
-  const ranks = ctx.keyframe.frame1.ranks;
+  const ranks = ctx.liveRanks ?? ctx.keyframe.frame1.ranks;
   return ranks.indexOf(ctx.pickedNumber) + 1 || 8;
 }
 
 function leaderNum(ctx: CommentaryContext) {
+  if (ctx.liveRanks && ctx.liveRanks.length > 0) return ctx.liveRanks[0];
   return ctx.keyframe.frame1.ranks[0];
 }
 

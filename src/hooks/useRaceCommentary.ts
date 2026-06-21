@@ -37,7 +37,7 @@ export function useRaceCommentary(ctx: CommentaryContext) {
     const justStarted = ctx.started && !lastRef.current.wasStarted;
     if (justStarted) {
       lastRef.current = {
-        leader: ctx.keyframe.frame1.ranks[0] ?? -1,
+        leader: ctx.liveRanks?.[0] ?? ctx.keyframe.frame1.ranks[0] ?? -1,
         at: Date.now(),
         overtakesFlag: false,
         wasStarted: true,
@@ -46,7 +46,7 @@ export function useRaceCommentary(ctx: CommentaryContext) {
       return;
     }
 
-    const leader = ctx.keyframe.frame1.ranks[0] ?? -1;
+    const leader = ctx.liveRanks?.[0] ?? ctx.keyframe.frame1.ranks[0] ?? -1;
     const leaderChanged = lastRef.current.leader !== leader && lastRef.current.leader !== -1;
     const overtake =
       ctx.keyframe.frame1.overtakes === true &&
@@ -87,6 +87,7 @@ export function useRaceCommentary(ctx: CommentaryContext) {
     ctx.keyframe.frame0.t,
     ctx.keyframe.frame1.t,
     ctx.keyframe.frame1.ranks.join(","),
+    ctx.liveRanks?.join(","),
     ctx.keyframe.frame1.overtakes,
     ctx.keyframe.t,
     ctx.pickedNumber,

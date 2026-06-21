@@ -263,13 +263,13 @@ export function racingLateralTarget(
 ): number {
   const gate = gateLateralT(horseNumber);
   const seed = (horseNumber * 1.618) % 1;
-  let target = 0.1 + seed * 0.8;
+  let target = 0.05 + seed * 0.9;
   target += Math.sin(raceProgress * 2.6 + horseNumber * 1.15) * 0.05;
   target += Math.cos(raceProgress * 5.2 + horseNumber * 0.55) * 0.025;
 
   if (count > 1 && raceProgress > 0.12) {
     const rankLane = 0.1 + (rankIdx / (count - 1)) * 0.8;
-    const spreadBlend = Math.min(1, (raceProgress - 0.12) / 0.22) * 0.3;
+    const spreadBlend = Math.min(1, (raceProgress - 0.12) / 0.22) * 0.12;
     target = target * (1 - spreadBlend) + rankLane * spreadBlend;
   }
 
@@ -788,7 +788,7 @@ export function viewportDimensions() {
 }
 
 export function raceHorseIconSize(viewportH: number) {
-  return Math.round(Math.min(9, Math.max(6, viewportH * 0.02)));
+  return Math.round(Math.min(18, Math.max(12, viewportH * 0.032)));
 }
 
 /** @deprecated stadiumPointAt 사용 */

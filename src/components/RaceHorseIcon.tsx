@@ -22,6 +22,8 @@ type RaceHorseIconProps = {
   tiltDeg?: number;
   animating?: boolean;
   compact?: boolean;
+  /** 멀티(파티): 내가 고른 말만 트랙에 이름표 */
+  showCheerName?: boolean;
 };
 
 export function RaceHorseIcon({
@@ -36,11 +38,12 @@ export function RaceHorseIcon({
   tiltDeg = 0,
   animating = false,
   compact = false,
+  showCheerName = false,
 }: RaceHorseIconProps) {
   const [frame, setFrame] = useState(0);
   const hue = silkHue ?? silkHueForNumber(number);
-  const w = size * (compact ? 1.42 : 2.15);
-  const h = size * (compact ? 0.95 : 1.05);
+  const w = size * (compact ? 1.65 : 2.15);
+  const h = size * (compact ? 1.2 : 1.05);
   const bodyTransform = getHorseSpriteTransform({ flipX, tiltDeg, x: 0, y: 0 });
   const jockeyShort = jockeyName?.slice(0, 3) ?? "";
   const src =
@@ -58,6 +61,19 @@ export function RaceHorseIcon({
     }, 110);
     return () => window.clearInterval(id);
   }, [animating]);
+
+  const silkNum = (
+    <span
+      className={
+        compact
+          ? "race-horse-unit__silk-num race-horse-unit__silk-num--track"
+          : "race-horse-unit__silk-num"
+      }
+      aria-hidden
+    >
+      {number}
+    </span>
+  );
 
   return (
     <div
@@ -98,13 +114,17 @@ export function RaceHorseIcon({
                 : silkFilter(hue),
             }}
           />
-          {!compact && (
-            <span className="race-horse-unit__silk-num" aria-hidden>
-              {number}
-            </span>
-          )}
+          {!compact && silkNum}
         </div>
       </div>
+
+      {compact && silkNum}
+
+      {compact && showCheerName && name && (
+        <div className="race-horse-unit__tag race-horse-unit__tag--cheer">
+          <span className="race-horse-unit__tag-name">{name.slice(0, 5)}</span>
+        </div>
+      )}
 
       {!compact && (
         <div className="race-horse-unit__label">
@@ -112,12 +132,6 @@ export function RaceHorseIcon({
           {jockeyName && (
             <span className="race-horse-unit__jockey">기수 {jockeyShort}</span>
           )}
-        </div>
-      )}
-
-      {compact && name && (
-        <div className="race-horse-unit__tag">
-          <span className="race-horse-unit__tag-name">{name.slice(0, 4)}</span>
         </div>
       )}
 

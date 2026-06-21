@@ -184,11 +184,22 @@ export function RacePage({
     ? entrantSource.find((e) => e.number === pickedNumber)
     : null;
 
+  const liveRanks = useMemo(
+    () =>
+      started && !finished
+        ? [...horseStates]
+            .sort((a, b) => a.rankIdx - b.rankIdx)
+            .map((h) => h.number)
+        : undefined,
+    [horseStates, started, finished],
+  );
+
   const commentary = useRaceCommentary({
     raceProgress,
     started,
     finished,
     keyframe,
+    liveRanks,
     entrantMap,
     pickedNumber,
     distance: result.condition.distance,
@@ -316,7 +327,7 @@ export function RacePage({
                 position: "absolute",
                 left: pos.x,
                 top: pos.y,
-                transform: "translate(-50%, -82%)",
+                transform: "translate(-50%, -88%)",
                 zIndex: number === pickedNumber ? 3 : 2,
               }}
             >
@@ -333,6 +344,11 @@ export function RacePage({
                 tiltDeg={pos.tiltDeg}
                 animating={started}
                 compact
+                showCheerName={
+                  result.mode === "party" &&
+                  pickedNumber != null &&
+                  number === pickedNumber
+                }
               />
             </div>
           );

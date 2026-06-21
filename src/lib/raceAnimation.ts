@@ -12,16 +12,13 @@ import {
 
 export const RACE_DURATION_MS = 56_000;
 
-/** 순위 간 전후 간격 (m) — 대각선 일렬 방지 */
-const PACK_GAP_M = 3.4;
+/** 순위 간 전후 간격 (m) */
+const PACK_GAP_M = 6.8;
 const SPREAD_RAMP_END = 0.18;
 const GATE_BLEND_END = 0.08;
 
-function horseAlongJitter(horseNumber: number): number {
-  return (
-    Math.sin(horseNumber * 2.17 + 0.8) * 1.8 +
-    Math.cos(horseNumber * 1.43 + 2.1) * 1.2
-  );
+function horseAlongJitter(_horseNumber: number, _raceProgress: number): number {
+  return 0;
 }
 
 /** 출발 직후 순위 간격·게이트 정렬을 서서히 풀어줌 */
@@ -71,6 +68,7 @@ export type InterpolatedHorse = {
   number: number;
   rankIdx: number;
   displayRank: number;
+  metersRemaining: number;
   pos: HorsePoint;
 };
 
@@ -86,16 +84,20 @@ export function buildInterpolatedHorses(
   metersState?: Map<number, number>,
 ): InterpolatedHorse[] {
   if (!started) {
-    return horseNumbers.map((number, idx) => ({
-      number,
-      rankIdx: idx,
-      displayRank: idx + 1,
-      pos: getHorsePositionAtMetersRemaining(
+    return horseNumbers.map((number, idx) => {
+      const pos = getHorsePositionAtMetersRemaining(
         layout,
         raceDistance,
         gateLateralT(number),
-      ),
-    }));
+      );
+      return {
+        number,
+        rankIdx: idx,
+        displayRank: idx + 1,
+        metersRemaining: raceDistance,
+        pos,
+      };
+    });
   }
 
   const { frame0, frame1, t, raceProgress: p } = getRaceKeyframe(
@@ -114,10 +116,10 @@ export function buildInterpolatedHorses(
     const rankIdx = rank0 + (rank1 - rank0) * t;
     const baseRemaining = raceDistance * (1 - p);
     const rankOffsetM = rankIdx * PACK_GAP_M * spreadFactor;
-    const jitterM = horseAlongJitter(number) * jitterFade;
+    const jitterM = horseAlongJitter(number, p) * jitterFade;
     const racedRemaining = Math.max(0, baseRemaining - rankOffsetM + jitterM);
     const metersRem = metersState
-      ? smoothMetersRemaining(number, blendMetersRemaining(p, racedRemaining, gateRemaining), metersState, 0.28)
+      ? smoothMetersRemaining(number, blendMetersRemaining(p, racedRemaining, gateRemaining), metersState, 0.42)
       : blendMetersRemaining(p, racedRemaining, gateRemaining);
     const targetLateral = racingLateralTarget(number, rankIdx, count, p);
     const lateralT = lateralState
@@ -135,6 +137,7 @@ export function buildInterpolatedHorses(
       number,
       rankIdx,
       displayRank: Math.round(rankIdx) + 1,
+      metersRemaining: metersRem,
       pos,
     };
   });

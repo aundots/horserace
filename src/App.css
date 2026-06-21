@@ -276,6 +276,7 @@ html:not(.play-store) #root {
   flex-direction: column;
   align-items: flex-start;
   gap: 6px;
+  width: 100%;
 }
 
 .race-hud__row {
@@ -342,24 +343,26 @@ html:not(.play-store) #root {
   opacity: 0.85;
 }
 
-/* ── 실시간 순위 전광판 ── */
+/* ── 실시간 순위 전광판 (가로·슬림) ── */
 .race-scoreboard {
-  min-width: 148px;
-  padding: 6px 8px 7px;
-  border-radius: 8px;
+  width: 100%;
+  max-width: 240px;
+  padding: 2px 5px 3px;
+  border-radius: 6px;
   background: rgba(6, 14, 10, 0.9);
   border: 1px solid rgba(72, 190, 98, 0.45);
   box-shadow:
-    0 0 14px rgba(40, 180, 70, 0.18),
-    inset 0 0 20px rgba(0, 0, 0, 0.35);
+    0 0 10px rgba(40, 180, 70, 0.15),
+    inset 0 0 12px rgba(0, 0, 0, 0.35);
 }
 
 .race-scoreboard__header {
-  font-size: 8px;
+  font-size: 7px;
   font-weight: 800;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   color: rgba(110, 230, 130, 0.75);
-  margin-bottom: 5px;
+  margin-bottom: 2px;
+  line-height: 1;
   text-transform: uppercase;
 }
 
@@ -368,64 +371,63 @@ html:not(.play-store) #root {
   margin: 0;
   padding: 0;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: stretch;
   gap: 3px;
 }
 
-.race-scoreboard__row {
+.race-scoreboard__col {
+  flex: 1;
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 5px;
-  padding: 3px 5px;
-  border-radius: 5px;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 1px 3px;
+  border-radius: 4px;
   background: rgba(255, 255, 255, 0.04);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   color: #e8fff0;
 }
 
-.race-scoreboard__row--1 {
+.race-scoreboard__col--1 {
   background: rgba(255, 215, 0, 0.12);
 }
 
-.race-scoreboard__row--2 {
+.race-scoreboard__col--2 {
   background: rgba(200, 210, 220, 0.1);
 }
 
-.race-scoreboard__row--3 {
+.race-scoreboard__col--3 {
   background: rgba(205, 127, 50, 0.12);
 }
 
 .race-scoreboard__rank {
-  width: 22px;
-  font-size: 8px;
+  font-size: 7px;
   font-weight: 900;
   color: rgba(130, 255, 150, 0.85);
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
 }
 
 .race-scoreboard__silk {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
   border: 1px solid rgba(255, 255, 255, 0.35);
 }
 
 .race-scoreboard__num {
-  min-width: 14px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
   color: #fff;
+  line-height: 1;
 }
 
 .race-scoreboard__name {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 600;
-  color: rgba(230, 255, 235, 0.92);
+  display: none;
 }
 
 /* ── 미니맵 ── */
@@ -636,13 +638,44 @@ html:not(.play-store) #root {
   overflow: visible;
 }
 
-.race-horse-unit--track .race-horse-unit__tag {
-  bottom: -7px;
-  font-size: 6px;
+.race-horse-unit__tag--cheer {
+  bottom: -10px;
+  max-width: 52px;
+  padding: 1px 5px;
+  font-size: 7px;
+  line-height: 1.15;
+  background: rgba(49, 130, 246, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.race-horse-unit__tag--cheer .race-horse-unit__tag-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.race-horse-unit__silk-num--track {
+  position: absolute;
+  left: 50%;
+  top: 28%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  font-weight: 900;
+  color: #fff;
   padding: 0 3px;
-  max-width: 32px;
-  line-height: 1.2;
-  background: rgba(0, 0, 0, 0.62);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.45);
+  line-height: 1.1;
+  z-index: 2;
+  pointer-events: none;
+}
+
+@media (max-width: 400px) {
+  .race-horse-unit__silk-num--track {
+    font-size: 9px;
+  }
 }
 
 .race-horse-unit--track .horse-gallop-bob {
