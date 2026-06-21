@@ -116,7 +116,7 @@ export function PartyPage({
 
   useEffect(() => {
     if (!party) return;
-    if (party.status === "done") return;
+    // done 상태에서도 폴링 유지 — 방장이 다음 경기를 준비(picking)하면 비방장도 감지해야 함
     const timer = setInterval(() => {
       refresh().catch(() => undefined);
     }, 2000);
