@@ -200,13 +200,18 @@ export async function joinParty(userKey: number, code: string, displayName?: str
     await deletePartyRoom(normalized);
     throw new Error("방 코드를 찾을 수 없어요.");
   }
-  if (room.status !== "waiting") throw new Error("이미 시작된 방이에요.");
-  if (room.members.length >= MAX_MEMBERS) throw new Error("방이 가득 찼어요.");
+  const alreadyMember = room.members.some((m) => m.userKey === userKey);
+  if (room.status === "racing" && !alreadyMember) {
+    throw new Error("경주 진행 중이에요. 잠시 후 다시 시도해 주세요.");
+  }
+  if (room.members.length >= MAX_MEMBERS && !alreadyMember) {
+    throw new Error("방이 가득 찼어요.");
+  }
 
   const existingCode = await loadUserPartyCode(userKey);
   if (existingCode && existingCode !== room.code) await leaveParty(userKey);
 
-  if (!room.members.some((m) => m.userKey === userKey)) {
+  if (!alreadyMember) {
     room.members.push(newMember(userKey, displayName));
   }
   await persistRoom(room);

@@ -24,14 +24,29 @@ type Page =
   | "settings"
   | "iaa";
 
+function readPartyDeepLink(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    const code = new URLSearchParams(window.location.search).get("party");
+    return code ? code.toUpperCase() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function App() {
-  const [page, setPage] = useState<Page>("home");
+  const [page, setPage] = useState<Page>(() =>
+    readPartyDeepLink() ? "party" : "home",
+  );
   const [raceResult, setRaceResult] = useState<RaceResult | null>(null);
   const [partyResults, setPartyResults] = useState<
     import("./types/game").PartyMemberResult[] | null
   >(null);
   const [rankedPrepare, setRankedPrepare] = useState<RankedPrepare | null>(null);
   const [party, setParty] = useState<PartySnapshot | null>(null);
+  const [partyJoinCode, setPartyJoinCode] = useState<string | undefined>(
+    readPartyDeepLink,
+  );
   const [continueAd, setContinueAd] = useState<AdPlacement | null>(null);
   const [ticketAd, setTicketAd] = useState<AdPlacement | null>(null);
   const auth = useAuthContext();
@@ -142,6 +157,7 @@ function App() {
     return (
       <PartyPage
         party={party}
+        initialJoinCode={partyJoinCode}
         onRefresh={player.fetchParty}
         onCreate={async (name) => {
           const p = await player.createParty(name);
@@ -151,6 +167,7 @@ function App() {
         onJoin={async (code, name) => {
           const p = await player.joinParty(code, name);
           setParty(p);
+          setPartyJoinCode(undefined);
           return p;
         }}
         onLeave={player.leaveParty}
