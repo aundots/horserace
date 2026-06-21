@@ -661,7 +661,7 @@ html:not(.play-store) #root {
   left: 50%;
   top: 28%;
   transform: translate(-50%, -50%);
-  font-size: 8px;
+  font-size: 5px;
   font-weight: 900;
   color: #fff;
   padding: 0 2px;
@@ -674,7 +674,7 @@ html:not(.play-store) #root {
 
 @media (max-width: 400px) {
   .race-horse-unit__silk-num--track {
-    font-size: 7px;
+    font-size: 5px;
   }
 }
 
@@ -685,7 +685,7 @@ html:not(.play-store) #root {
   bottom: -7px;
   transform: translateX(-50%);
   max-width: 40px;
-  font-size: 5.5px;
+  font-size: 3px;
   font-weight: 800;
   line-height: 1.1;
   color: #fff;
@@ -708,7 +708,7 @@ html:not(.play-store) #root {
 
 @media (max-width: 400px) {
   .race-horse-unit__nametag {
-    font-size: 5px;
+    font-size: 3px;
     max-width: 34px;
     bottom: -6px;
   }
