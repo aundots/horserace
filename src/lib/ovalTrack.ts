@@ -360,8 +360,8 @@ export function stadiumPointAt(
     return {
       x: x0 + R * cos,
       y: cy + R * sin,
-      dx: -sin * tangentScale,
-      dy: cos * tangentScale,
+      dx: sin * tangentScale,
+      dy: -cos * tangentScale,
     };
   }
   d -= leftArc;
@@ -382,8 +382,8 @@ export function stadiumPointAt(
   return {
     x: x1 + R * cos,
     y: cy + R * sin,
-    dx: -sin * tangentScale,
-    dy: cos * tangentScale,
+    dx: sin * tangentScale,
+    dy: -cos * tangentScale,
   };
 }
 
