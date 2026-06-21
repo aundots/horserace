@@ -169,6 +169,8 @@ export function PartyPage({
   }
 
   if (!party) {
+    const trimmedNick = nick.trim();
+    const canJoin = trimmedNick.length > 0 && joinCode.length >= 4;
     return (
       <>
         <Top
@@ -182,8 +184,8 @@ export function PartyPage({
         <div style={{ padding: "0 20px", display: "grid", gap: 12 }}>
           <TextField
             variant="box"
-            label="닉네임"
-            placeholder="닉네임 입력"
+            label="닉네임 (입장 시 필수)"
+            placeholder="닉네임 입력 · 코드로 입장하려면 필요해요"
             value={nick}
             onChange={(e) => setNick(e.target.value)}
           />
@@ -207,11 +209,16 @@ export function PartyPage({
             size="large"
             color="dark"
             variant="weak"
-            disabled={busy || joinCode.length < 4}
-            onClick={() => act(() => onJoin(joinCode, nick || undefined), "입장했어요")}
+            disabled={busy || !canJoin}
+            onClick={() => act(() => onJoin(joinCode, trimmedNick), "입장했어요")}
           >
             코드로 입장
           </Button>
+          {joinCode.length >= 4 && trimmedNick.length === 0 && (
+            <p style={{ fontSize: 13, color: colors.grey600, margin: 0, textAlign: "center" }}>
+              입장하려면 닉네임을 입력해 주세요
+            </p>
+          )}
           <Button display="block" size="medium" color="dark" variant="weak" onClick={onBack}>
             돌아가기
           </Button>
