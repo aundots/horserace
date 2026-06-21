@@ -170,7 +170,10 @@ function App() {
           setPartyJoinCode(undefined);
           return p;
         }}
-        onLeave={player.leaveParty}
+        onLeave={async () => {
+          await player.leaveParty();
+          setParty(null);
+        }}
         onPrepare={player.prepareParty}
         onPredict={player.predictParty}
         onRevealTip={async (n) => {
@@ -243,7 +246,10 @@ function App() {
       player={player}
       showRewardedAd={showRewardedAd}
       onOpenAds={() => setPage("iaa")}
-      onOpenParty={() => setPage("party")}
+      onOpenParty={() => {
+        setPage("party");
+        player.fetchParty().then(setParty).catch(() => setParty(null));
+      }}
       onOpenMissions={() => setPage("missions")}
       onOpenHelp={() => setPage("help")}
       onOpenSettings={() => setPage("settings")}

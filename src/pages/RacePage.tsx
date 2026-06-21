@@ -2,6 +2,7 @@ import { Button } from "@toss/tds-mobile";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FinishLineTop3 } from "../components/FinishLineTop3";
 import { RaceLiveScoreboard } from "../components/RaceLiveScoreboard";
+import { RacePartyPicks } from "../components/RacePartyPicks";
 import { RaceCommentaryBar } from "../components/RaceCommentaryBar";
 import { RaceHorseIcon } from "../components/RaceHorseIcon";
 import { RaceTrackScene } from "../components/RaceTrackScene";
@@ -194,6 +195,21 @@ export function RacePage({
     [horseStates, started, finished],
   );
 
+  const opponentPicks = useMemo(() => {
+    if (result.mode !== "party" || !partyResults) return [];
+    return partyResults
+      .filter((m) => m.pick != null && m.pick !== pickedNumber)
+      .map((m) => {
+        const ent = entrantMap.get(m.pick!);
+        return {
+          userKey: m.userKey,
+          name: m.displayName,
+          number: m.pick!,
+          silkHue: ent?.silkHue,
+        };
+      });
+  }, [result.mode, partyResults, pickedNumber, entrantMap]);
+
   const commentary = useRaceCommentary({
     raceProgress,
     started,
@@ -300,7 +316,10 @@ export function RacePage({
                 <span className="race-hud__stat">역전 {result.overtakes}회</span>
               )}
             </div>
-            <RaceLiveScoreboard leaders={liveTop3} visible={started && !finished} />
+            <div className="race-hud__board-row">
+              <RaceLiveScoreboard leaders={liveTop3} visible={started && !finished} />
+              <RacePartyPicks picks={opponentPicks} visible={started && !finished} />
+            </div>
           </div>
         }
         finishOverlay={
