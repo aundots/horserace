@@ -678,6 +678,42 @@ html:not(.play-store) #root {
   }
 }
 
+/* 트랙 위 — 번호 아래 이름표 (겹침 최소화용 소형) */
+.race-horse-unit__nametag {
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  transform: translateX(-50%);
+  max-width: 44px;
+  font-size: 7px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.52);
+  padding: 1px 4px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.race-horse-unit__nametag--cheer {
+  background: rgba(49, 130, 246, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  z-index: 5;
+}
+
+@media (max-width: 400px) {
+  .race-horse-unit__nametag {
+    font-size: 6px;
+    max-width: 38px;
+    bottom: -7px;
+  }
+}
+
 .race-horse-unit--track .horse-gallop-bob {
   animation: horse-gallop-bob 0.22s ease-in-out infinite alternate;
 }

@@ -345,9 +345,7 @@ export function RacePage({
                 animating={started}
                 compact
                 showCheerName={
-                  result.mode === "party" &&
-                  pickedNumber != null &&
-                  number === pickedNumber
+                  pickedNumber != null && number === pickedNumber
                 }
               />
             </div>

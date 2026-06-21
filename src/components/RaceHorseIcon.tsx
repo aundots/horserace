@@ -120,9 +120,13 @@ export function RaceHorseIcon({
 
       {compact && silkNum}
 
-      {compact && showCheerName && name && (
-        <div className="race-horse-unit__tag race-horse-unit__tag--cheer">
-          <span className="race-horse-unit__tag-name">{name.slice(0, 5)}</span>
+      {compact && name && (
+        <div
+          className={`race-horse-unit__nametag${
+            showCheerName ? " race-horse-unit__nametag--cheer" : ""
+          }`}
+        >
+          {name.slice(0, 4)}
         </div>
       )}
 
