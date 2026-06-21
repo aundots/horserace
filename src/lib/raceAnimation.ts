@@ -115,7 +115,8 @@ export function buildInterpolatedHorses(
     const rank1 = frame1.ranks.indexOf(number);
     const rankIdx = rank0 + (rank1 - rank0) * t;
     const baseRemaining = raceDistance * (1 - p);
-    // rankIdx 0 = 선두 → 결승까지 남은 거리 최소
+    // 트랙 좌표계: metersRemaining이 작을수록 progress가 높아 결승에 가깝다(=선두).
+    // 따라서 1위(rankIdx 0)는 남은 거리가 가장 작아야 한다.
     const ranksBehind = Math.max(0, count - 1 - rankIdx);
     const rankOffsetM = ranksBehind * PACK_GAP_M * spreadFactor;
     const jitterM = horseAlongJitter(number, p) * jitterFade;
@@ -147,9 +148,7 @@ export function buildInterpolatedHorses(
 
 export function pickLeader(horses: InterpolatedHorse[]): InterpolatedHorse | null {
   if (horses.length === 0) return null;
-  return horses.reduce((best, h) =>
-    h.metersRemaining < best.metersRemaining ? h : best,
-  );
+  return horses.reduce((best, h) => (h.rankIdx < best.rankIdx ? h : best));
 }
 
 export function isOvertakeFrame(keyframe: RaceKeyframe): boolean {
