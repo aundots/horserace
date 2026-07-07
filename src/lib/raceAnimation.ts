@@ -13,7 +13,7 @@ import {
 export const RACE_DURATION_MS = 56_000;
 
 /** 순위 간 전후 간격 (m) */
-const PACK_GAP_M = 6.8;
+const PACK_GAP_M = 10.2;
 const SPREAD_RAMP_END = 0.18;
 const GATE_BLEND_END = 0.08;
 

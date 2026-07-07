@@ -200,7 +200,7 @@ export function HomePage({
       <Top
         title={<Top.TitleParagraph size={22}>말달리자</Top.TitleParagraph>}
         subtitleBottom={
-          <Top.SubtitleParagraph size={15}>찌라시 열고 1착을 맞혀보세요</Top.SubtitleParagraph>
+          <Top.SubtitleParagraph size={15}>친구와 맞추기를 메인으로 즐겨보세요</Top.SubtitleParagraph>
         }
         right={
           <Badge size="small" color="blue" variant="weak">
@@ -220,11 +220,20 @@ export function HomePage({
           }}
         >
           <div style={{ marginBottom: 14 }}>
-            <div style={{ fontSize: 18, fontWeight: 800 }}>오늘의 경주</div>
+            <div style={{ fontSize: 18, fontWeight: 800 }}>친구와 맞추기 · 메인 모드</div>
             <div style={{ fontSize: 13, opacity: 0.8, marginTop: 4 }}>
-              하루 1회 무료 · 이후 경주는 광고로 티켓 획득
+              방 만들기 · 코드 입장 · 말 중복 선택 불가
             </div>
           </div>
+
+          <Button
+            display="block"
+            size="xlarge"
+            onClick={onOpenParty}
+            style={{ marginBottom: 8 }}
+          >
+            친구와 맞추기 시작
+          </Button>
 
           <div
             style={{
@@ -279,7 +288,7 @@ export function HomePage({
               onClick={handleRace}
               style={{ marginBottom: 8 }}
             >
-              경주 시작
+              솔로 경주 시작
             </Button>
           )}
 

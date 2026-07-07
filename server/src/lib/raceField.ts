@@ -90,6 +90,14 @@ export function buildRaceField(anchor: { speed: number; stamina: number; accel: 
     h.name = botNames[i];
   });
 
+  // 멀티/솔로 공통: 능력치 편차를 줄여 고만고만하게 붙게 조정
+  const tighten = (value: number, base: number) => Math.round(base + (value - base) * 0.45);
+  for (const h of horses) {
+    h.speed = tighten(h.speed, anchor.speed);
+    h.stamina = tighten(h.stamina, anchor.stamina);
+    h.accel = tighten(h.accel, anchor.accel);
+  }
+
   const jockeys = assignJockeys(horses);
   const silkMap = assignRandomSilkHues(horses.map((h) => h.number));
   for (const h of horses) {

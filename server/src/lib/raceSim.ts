@@ -58,16 +58,16 @@ export type RaceEvent = {
 };
 
 const PACE_MULT: Record<PaceType, number[]> = {
-  FRONT: [1.1, 1.05, 0.95, 0.9],
-  STALKER: [1.06, 1.02, 0.98, 0.94],
-  MID: [0.98, 1.0, 1.02, 1.04],
-  CLOSER: [0.92, 0.96, 1.04, 1.12],
+  FRONT: [1.12, 1.07, 0.94, 0.88],
+  STALKER: [1.07, 1.03, 0.97, 0.93],
+  MID: [0.97, 1.0, 1.03, 1.06],
+  CLOSER: [0.89, 0.95, 1.06, 1.14],
 };
 
 const TRACK_MATRIX: Record<TrackState, Record<TrackState, number>> = {
-  DRY: { DRY: 0.97, WET: 1.03, HEAVY: 1.05 },
-  WET: { DRY: 1.03, WET: 0.97, HEAVY: 0.98 },
-  HEAVY: { DRY: 1.02, WET: 1.0, HEAVY: 0.96 },
+  DRY: { DRY: 0.95, WET: 1.05, HEAVY: 1.08 },
+  WET: { DRY: 1.05, WET: 0.95, HEAVY: 0.97 },
+  HEAVY: { DRY: 1.04, WET: 1.0, HEAVY: 0.94 },
 };
 
 const HORSE_NAMES = [
@@ -147,18 +147,18 @@ function distanceModifier(horse: RaceHorse, distance: RaceCondition["distance"])
     (distance === 1200 && horse.distanceApt === "SPRINT") ||
     (distance === 1600 && horse.distanceApt === "MIDDLE") ||
     (distance === 2000 && horse.distanceApt === "LONG");
-  return match ? 0.985 : 1.02;
+  return match ? 0.975 : 1.03;
 }
 
 function conditionModifier(condition: Condition) {
-  if (condition === "GREAT") return 0.99;
-  if (condition === "POOR") return 1.02;
+  if (condition === "GREAT") return 0.985;
+  if (condition === "POOR") return 1.03;
   return 1;
 }
 
 function cornerWetBonus(horse: RaceHorse, track: TrackState, segmentIndex: number) {
   if (horse.trackApt === "WET" && track === "WET" && (segmentIndex === 1 || segmentIndex === 3)) {
-    return 0.98;
+    return 0.97;
   }
   return 1;
 }
