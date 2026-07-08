@@ -9,7 +9,7 @@ import {
   useToast,
 } from "@toss/tds-mobile";
 import { useEffect, useState } from "react";
-import { showDevAdsLink, showDevLogin } from "../lib/devAccess";
+import { showDevAdsLink } from "../lib/devAccess";
 import type { useAuth } from "../hooks/useAuth";
 import type { usePlayer } from "../hooks/usePlayer";
 import type { AdPlacement, RankedPrepare } from "../types/game";
@@ -41,7 +41,7 @@ export function HomePage({
   onStartPredict,
 }: HomePageProps) {
   const toast = useToast();
-  const { isLoggedIn, loading, login, devLogin, demoLogin, isPlayStore, logout } =
+  const { isLoggedIn, loading, login, demoLogin, isPlayStore, logout } =
     auth;
   const {
     snapshot,
@@ -171,17 +171,6 @@ export function HomePage({
           ) : (
             <Button display="block" size="xlarge" onClick={login}>
               토스로 시작하기
-            </Button>
-          )}
-          {showDevLogin() && (
-            <Button
-              display="block"
-              size="large"
-              color="dark"
-              variant="weak"
-              onClick={devLogin}
-            >
-              개발용 로그인
             </Button>
           )}
         </div>

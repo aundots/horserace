@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { createSession, upsertUser } from "../db/store.js";
 import { getOrCreatePlayer } from "../db/playerStore.js";
-import { canDevLogin } from "../lib/devAccess.js";
 import { allocatePlayDemoUserKey, isPlayDemoEnabled } from "../lib/playDemo.js";
 import {
   attachDemoState,
@@ -62,23 +61,6 @@ authRouter.post("/demo-login", async (_req, res) => {
   };
   attachDemoState(userKey, body);
   res.json(body);
-});
-
-authRouter.post("/dev-login", async (req, res) => {
-  const userKey = Number(req.body?.userKey ?? 10001);
-
-  if (!canDevLogin(userKey)) {
-    res.status(404).json({ ok: false, message: "Not found" });
-    return;
-  }
-  await upsertUser(userKey);
-  const session = await createSession(userKey);
-  res.json({
-    ok: true,
-    sessionId: session.id,
-    userKey,
-    expiresAt: session.expiresAt.toISOString(),
-  });
 });
 
 authRouter.get("/me", meHandler);

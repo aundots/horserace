@@ -8,7 +8,7 @@ export const PLAY_DEMO_USER_KEY_MAX = 99_999;
 export const PLAY_DEMO_USER_KEY = PLAY_DEMO_USER_KEY_MIN;
 
 /** Daily free ranked tickets for Play Store demo-login (IARC / internal test). */
-export const PLAY_DEMO_RANKED_TICKETS_DAILY = 999;
+export const PLAY_DEMO_RANKED_TICKETS_DAILY = 5;
 
 export function isPlayDemoEnabled(): boolean {
   return process.env.PLAY_DEMO === "true";

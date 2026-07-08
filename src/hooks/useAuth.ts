@@ -2,7 +2,6 @@ import { appLogin } from "@apps-in-toss/web-framework";
 import { useToast } from "@toss/tds-mobile";
 import { useCallback, useEffect, useState } from "react";
 import { apiGet, apiPost, clearDemoState, clearPartyCode } from "../api/client";
-import { devUserKeyForLogin } from "../lib/devAccess";
 import { isPlayStoreBuild } from "../lib/playStore";
 
 const SESSION_KEY = "horserace.sessionId";
@@ -72,22 +71,6 @@ export function useAuth() {
     }
   }, [toast]);
 
-  const devLogin = useCallback(async () => {
-    try {
-      const result = await apiPost<LoginResponse>("/auth/dev-login", {
-        userKey: devUserKeyForLogin(),
-      });
-      localStorage.setItem(SESSION_KEY, result.sessionId);
-      setSessionId(result.sessionId);
-      setUserKey(result.userKey);
-      toast.openToast("개발용 로그인됐어요.", { type: "success" });
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "개발용 로그인에 실패했어요.";
-      toast.openToast(message, { type: "bottom" });
-    }
-  }, [toast]);
-
   const demoLogin = useCallback(async () => {
     try {
       const result = await apiPost<LoginResponse>("/auth/demo-login", {});
@@ -116,7 +99,6 @@ export function useAuth() {
     loading,
     isLoggedIn: Boolean(userKey),
     login,
-    devLogin,
     demoLogin,
     isPlayStore: isPlayStoreBuild(),
     logout,

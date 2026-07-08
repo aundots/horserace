@@ -5,17 +5,10 @@ export function getDevUserKey(): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-/** Unlimited tickets, ad eligibility bypass — only for the configured dev user. */
+/** Unlimited tickets, ad eligibility bypass — only when DEV_LOGIN=true and DEV_USER_KEY matches. */
 export function isDevUser(userKey: number): boolean {
   if (process.env.DEV_LOGIN !== "true") return false;
   const devKey = getDevUserKey();
   if (devKey === null) return false;
   return userKey === devKey;
-}
-
-export function canDevLogin(requestedUserKey: number): boolean {
-  if (process.env.DEV_LOGIN !== "true") return false;
-  const devKey = getDevUserKey();
-  if (devKey === null) return true;
-  return requestedUserKey === devKey;
 }
