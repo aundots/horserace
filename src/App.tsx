@@ -4,6 +4,7 @@ import { useAuthContext } from "./context/AuthContext";
 import { useMonetization } from "./hooks/useMonetization";
 import { usePlayer } from "./hooks/usePlayer";
 import { partyToRaceResult } from "./lib/partyRace";
+import { AppBannerAd } from "./components/AppBannerAd";
 import { HelpPage } from "./pages/HelpPage";
 import { HomePage } from "./pages/HomePage";
 import { InAppAdsPage } from "./pages/InAppAdsPage";
@@ -13,6 +14,7 @@ import { PredictPage } from "./pages/PredictPage";
 import { RacePage } from "./pages/RacePage";
 import { SettingsPage } from "./pages/SettingsPage";
 import type { AdPlacement, PartySnapshot, RaceResult, RankedPrepare } from "./types/game";
+import type { ReactNode } from "react";
 
 type Page =
   | "home"
@@ -57,6 +59,18 @@ function App() {
     [player.claimAdReward],
   );
   const { showRewardedAd } = useMonetization(claimAdReward);
+
+  function renderWithBanners(content: ReactNode) {
+    const showBottomBanner = page !== "race";
+
+    return (
+      <div className="app-shell">
+        <AppBannerAd position="top" onClick={() => setPage("iaa")} />
+        <div className="app-shell__content">{content}</div>
+        {showBottomBanner && <AppBannerAd position="bottom" onClick={() => setPage("iaa")} />}
+      </div>
+    );
+  }
 
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
@@ -121,11 +135,11 @@ function App() {
   }
 
   if (page === "iaa") {
-    return <InAppAdsPage onBack={() => setPage("home")} />;
+    return renderWithBanners(<InAppAdsPage onBack={() => setPage("home")} />);
   }
 
   if (page === "race" && raceResult) {
-    return (
+    return renderWithBanners(
       <RacePage
         result={raceResult}
         rankedAvailable={player.snapshot?.rankedAvailable ?? false}
@@ -149,12 +163,12 @@ function App() {
           setPartyResults(null);
           setPage("home");
         }}
-      />
+      />,
     );
   }
 
   if (page === "party" && userKey) {
-    return (
+    return renderWithBanners(
       <PartyPage
         party={party}
         initialJoinCode={partyJoinCode}
@@ -185,12 +199,12 @@ function App() {
         onBack={() => {
           setPage("home");
         }}
-      />
+      />,
     );
   }
 
   if (page === "predict" && rankedPrepare) {
-    return (
+    return renderWithBanners(
       <PredictPage
         prepare={rankedPrepare}
         freeTipReveals={player.snapshot?.freeTipReveals ?? 0}
@@ -218,29 +232,29 @@ function App() {
           setRankedPrepare(null);
           setPage("home");
         }}
-      />
+      />,
     );
   }
 
   if (page === "missions" && player.snapshot) {
-    return (
+    return renderWithBanners(
       <MissionsPage
         snapshot={player.snapshot}
         claimAttendance={player.claimAttendance}
         onBack={() => setPage("home")}
-      />
+      />,
     );
   }
 
   if (page === "help") {
-    return <HelpPage onBack={() => setPage("home")} />;
+    return renderWithBanners(<HelpPage onBack={() => setPage("home")} />);
   }
 
   if (page === "settings") {
-    return <SettingsPage onBack={() => setPage("home")} />;
+    return renderWithBanners(<SettingsPage onBack={() => setPage("home")} />);
   }
 
-  return (
+  return renderWithBanners(
     <HomePage
       auth={auth}
       player={player}
@@ -257,7 +271,7 @@ function App() {
         setRankedPrepare(prepare);
         setPage("predict");
       }}
-    />
+    />,
   );
 }
 

@@ -12,6 +12,83 @@ html:not(.play-store) #root {
   padding-top: max(env(safe-area-inset-top, 0px), var(--app-safe-top-fallback));
 }
 
+.app-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell__content {
+  flex: 1;
+  min-height: 0;
+}
+
+.app-banner {
+  width: calc(100% - 24px);
+  margin: 10px 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #132238 0%, #234a78 100%);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(17, 35, 58, 0.18);
+}
+
+.app-banner--top {
+  margin-top: 12px;
+}
+
+.app-banner--bottom {
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #1c3557 0%, #316fba 100%);
+}
+
+.app-banner__badge {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.app-banner__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.app-banner__text strong {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.app-banner__text span {
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.app-banner__cta {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 800;
+  color: #d9ebff;
+}
+
 @media (min-width: 481px) {
   #root {
     background-color: #ffffff !important;
