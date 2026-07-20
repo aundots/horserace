@@ -36,20 +36,13 @@ adsRouter.get("/ssv", async (req, res) => {
   const rawQuery = req.url.includes("?") ? req.url.slice(req.url.indexOf("?") + 1) : "";
   const parsed = parseSsvQuery(rawQuery);
 
-  // TODO(임시 디버그): AdMob 콘솔 "콜백 테스트"가 400 을 받는 원인 확인 후 제거.
-  console.log("[ads/ssv] rawQuery:", rawQuery);
-
   if (!parsed) {
-    console.log("[ads/ssv] parse failed — no &signature= in rawQuery, or missing key_id/transaction_id");
     res.status(400).send("bad request");
     return;
   }
 
-  console.log("[ads/ssv] parsed:", JSON.stringify(parsed));
-
   const valid = await verifySsvSignature(parsed);
   if (!valid) {
-    console.log("[ads/ssv] signature verification failed for keyId:", parsed.keyId);
     res.status(400).send("invalid signature");
     return;
   }
