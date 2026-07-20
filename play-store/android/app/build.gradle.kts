@@ -16,12 +16,25 @@ fun resolveKeystoreFile(): java.io.File {
 }
 
 /**
- * AdMob ID — 기본값은 Google 공식 테스트 ID.
- * 실제 ID 는 keystore.env 처럼 환경변수로 주입한다 (자기 앱의 실광고 클릭은 정책 위반).
- * 예) ADMOB_APP_ID=ca-app-pub-3585849238017368~0000000000
+ * AdMob ID.
+ *
+ * debug 빌드는 Google 공식 테스트 ID, release 빌드는 실제 ID 를 쓴다.
+ * 개발 중 자기 앱의 실광고를 클릭하면 계정이 정지되므로 절대 섞지 않는다.
+ * 광고 단위 ID 는 APK 를 뜯으면 보이는 값이라 비밀이 아니다 — 소스에 두어도 무방.
  */
-fun admobId(envKey: String, testDefault: String): String =
-    System.getenv(envKey)?.takeIf { it.isNotBlank() } ?: testDefault
+object Admob {
+    const val REAL_APP_ID = "ca-app-pub-3585849238017368~2216233246"
+    const val REAL_BANNER = "ca-app-pub-3585849238017368/6579818386"
+    const val REAL_INTERSTITIAL = "ca-app-pub-3585849238017368/1327491707"
+
+    // TODO: AdMob 콘솔에서 horserace-rewarded 생성 후 교체
+    const val REAL_REWARDED = "ca-app-pub-3940256099942544/5224354917"
+
+    const val TEST_APP_ID = "ca-app-pub-3940256099942544~3347511713"
+    const val TEST_BANNER = "ca-app-pub-3940256099942544/6300978111"
+    const val TEST_INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712"
+    const val TEST_REWARDED = "ca-app-pub-3940256099942544/5224354917"
+}
 
 android {
     namespace = "com.aundots.horserace"
@@ -34,24 +47,6 @@ android {
         versionCode = 11
         versionName = "1.0.6"
 
-        manifestPlaceholders["admobAppId"] =
-            admobId("ADMOB_APP_ID", "ca-app-pub-3940256099942544~3347511713")
-
-        buildConfigField(
-            "String",
-            "ADMOB_BANNER_ID",
-            "\"${admobId("ADMOB_BANNER_ID", "ca-app-pub-3940256099942544/6300978111")}\"",
-        )
-        buildConfigField(
-            "String",
-            "ADMOB_REWARDED_ID",
-            "\"${admobId("ADMOB_REWARDED_ID", "ca-app-pub-3940256099942544/5224354917")}\"",
-        )
-        buildConfigField(
-            "String",
-            "ADMOB_INTERSTITIAL_ID",
-            "\"${admobId("ADMOB_INTERSTITIAL_ID", "ca-app-pub-3940256099942544/1033173712")}\"",
-        )
     }
 
     buildFeatures {
@@ -73,7 +68,27 @@ android {
     }
 
     buildTypes {
+        debug {
+            manifestPlaceholders["admobAppId"] = Admob.TEST_APP_ID
+            buildConfigField("String", "ADMOB_BANNER_ID", "\"${Admob.TEST_BANNER}\"")
+            buildConfigField("String", "ADMOB_REWARDED_ID", "\"${Admob.TEST_REWARDED}\"")
+            buildConfigField(
+                "String",
+                "ADMOB_INTERSTITIAL_ID",
+                "\"${Admob.TEST_INTERSTITIAL}\"",
+            )
+        }
+
         release {
+            manifestPlaceholders["admobAppId"] = Admob.REAL_APP_ID
+            buildConfigField("String", "ADMOB_BANNER_ID", "\"${Admob.REAL_BANNER}\"")
+            buildConfigField("String", "ADMOB_REWARDED_ID", "\"${Admob.REAL_REWARDED}\"")
+            buildConfigField(
+                "String",
+                "ADMOB_INTERSTITIAL_ID",
+                "\"${Admob.REAL_INTERSTITIAL}\"",
+            )
+
             isMinifyEnabled = false
             val keystoreFile = resolveKeystoreFile()
             val storePass = System.getenv("PLAY_KEYSTORE_PASSWORD").orEmpty()
