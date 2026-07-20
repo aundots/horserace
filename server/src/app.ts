@@ -53,3 +53,5 @@ app.use("/weekly-pass", weeklyPassRouter);
 app.use("/reward", rewardRouter);
 
 startSettlementScheduler();
+
+export default app;
