@@ -26,9 +26,7 @@ object Admob {
     const val REAL_APP_ID = "ca-app-pub-3585849238017368~2216233246"
     const val REAL_BANNER = "ca-app-pub-3585849238017368/6579818386"
     const val REAL_INTERSTITIAL = "ca-app-pub-3585849238017368/1327491707"
-
-    // TODO: AdMob 콘솔에서 horserace-rewarded 생성 후 교체
-    const val REAL_REWARDED = "ca-app-pub-3940256099942544/5224354917"
+    const val REAL_REWARDED = "ca-app-pub-3585849238017368/9851869040"
 
     const val TEST_APP_ID = "ca-app-pub-3940256099942544~3347511713"
     const val TEST_BANNER = "ca-app-pub-3940256099942544/6300978111"
