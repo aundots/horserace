@@ -100,8 +100,8 @@ export function parseSsvQuery(rawQuery: string): SsvParams | null {
     transactionId,
     customData: params.get("custom_data") ?? "",
     adUnit: params.get("ad_unit") ?? "",
-    // AdMob timestamp 는 마이크로초 단위로 온다.
-    timestampMs: Number.isFinite(timestamp) ? Math.floor(timestamp / 1000) : 0,
+    // AdMob timestamp 는 이미 밀리초 단위로 온다 (13자리, Date.now()와 동일 스케일).
+    timestampMs: Number.isFinite(timestamp) ? timestamp : 0,
   };
 }
 
