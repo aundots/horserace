@@ -15,6 +15,14 @@ fun resolveKeystoreFile(): java.io.File {
     return rootProject.file("../horserace-release.jks")
 }
 
+/**
+ * AdMob ID — 기본값은 Google 공식 테스트 ID.
+ * 실제 ID 는 keystore.env 처럼 환경변수로 주입한다 (자기 앱의 실광고 클릭은 정책 위반).
+ * 예) ADMOB_APP_ID=ca-app-pub-3585849238017368~0000000000
+ */
+fun admobId(envKey: String, testDefault: String): String =
+    System.getenv(envKey)?.takeIf { it.isNotBlank() } ?: testDefault
+
 android {
     namespace = "com.aundots.horserace"
     compileSdk = 35
@@ -25,6 +33,29 @@ android {
         targetSdk = 35
         versionCode = 11
         versionName = "1.0.6"
+
+        manifestPlaceholders["admobAppId"] =
+            admobId("ADMOB_APP_ID", "ca-app-pub-3940256099942544~3347511713")
+
+        buildConfigField(
+            "String",
+            "ADMOB_BANNER_ID",
+            "\"${admobId("ADMOB_BANNER_ID", "ca-app-pub-3940256099942544/6300978111")}\"",
+        )
+        buildConfigField(
+            "String",
+            "ADMOB_REWARDED_ID",
+            "\"${admobId("ADMOB_REWARDED_ID", "ca-app-pub-3940256099942544/5224354917")}\"",
+        )
+        buildConfigField(
+            "String",
+            "ADMOB_INTERSTITIAL_ID",
+            "\"${admobId("ADMOB_INTERSTITIAL_ID", "ca-app-pub-3940256099942544/1033173712")}\"",
+        )
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     signingConfigs {
@@ -71,4 +102,5 @@ android {
 dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.core:core-ktx:1.15.0")
+    implementation("com.google.android.gms:play-services-ads:23.6.0")
 }

@@ -8,7 +8,7 @@ import {
   Top,
   useToast,
 } from "@toss/tds-mobile";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { showDevAdsLink } from "../lib/devAccess";
 import type { useAuth } from "../hooks/useAuth";
 import type { usePlayer } from "../hooks/usePlayer";
@@ -53,6 +53,14 @@ export function HomePage({
   } = player;
 
   const [adPlacements, setAdPlacements] = useState<AdPlacement[]>([]);
+  const autoDemoTried = useRef(false);
+
+  // Play Store 빌드는 시작 화면 없이 바로 메인으로 진입한다.
+  useEffect(() => {
+    if (!isPlayStore || loading || isLoggedIn || autoDemoTried.current) return;
+    autoDemoTried.current = true;
+    demoLogin();
+  }, [isPlayStore, loading, isLoggedIn, demoLogin]);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -165,8 +173,9 @@ export function HomePage({
         />
         <div style={{ padding: "0 20px", display: "grid", gap: 10 }}>
           {isPlayStore ? (
+            // 자동 진입 중 — 실패했을 때만 수동 재시도 버튼이 의미를 갖는다.
             <Button display="block" size="xlarge" onClick={demoLogin}>
-              게임 체험하기
+              {autoDemoTried.current ? "다시 시도" : "불러오는 중..."}
             </Button>
           ) : (
             <Button display="block" size="xlarge" onClick={login}>
@@ -227,7 +236,7 @@ export function HomePage({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
+              gridTemplateColumns: "1fr 1fr",
               gap: 8,
               marginBottom: 12,
             }}
@@ -236,10 +245,6 @@ export function HomePage({
             <StatPill
               label="경주 티켓"
               value={`${s.rankedTicketsLeft}/${s.rankedTicketsMax}`}
-            />
-            <StatPill
-              label="연속 출전"
-              value={`${s.sessionRaceStreak ?? 0}판`}
             />
           </div>
 

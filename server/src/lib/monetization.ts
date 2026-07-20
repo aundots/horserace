@@ -4,7 +4,7 @@ import { kstDateKey } from "./kst.js";
 export const PLACEMENTS = {
   AD_GOLD_2X: { daily: 5, session: 2, cooldownMs: 90_000 },
   AD_STAMINA: { daily: 3, session: 2, cooldownMs: 90_000 },
-  AD_RANK_TICKET: { daily: 15, session: 8, cooldownMs: 30_000 },
+  AD_RANK_TICKET: { daily: 20, session: 20, newbieDaily: 20, cooldownMs: 30_000 },
   AD_TRAIN: { daily: 2, session: 1, cooldownMs: 90_000 },
   AD_REVIVE: { daily: 1, session: 1, cooldownMs: 90_000 },
   AD_DAILY_CHEST: { daily: 1, session: 1, cooldownMs: 60_000 },
@@ -47,7 +47,9 @@ export function getAdEligibility(
     entry.sessionDate = today;
   }
 
-  const dailyCap = accountDays < 1 ? Math.min(rules.daily, 5) : rules.daily;
+  // 가입 첫날은 어뷰징 방지로 한도를 낮추되, placement별로 newbieDaily 로 완화할 수 있다.
+  const newbieCap = "newbieDaily" in rules ? rules.newbieDaily : 5;
+  const dailyCap = accountDays < 1 ? Math.min(rules.daily, newbieCap) : rules.daily;
   const globalCooldown = Date.now() - globalLastMs < 30_000;
   const placementCooldown = Date.now() - entry.lastMs < rules.cooldownMs;
 

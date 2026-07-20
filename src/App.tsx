@@ -4,6 +4,7 @@ import { useAuthContext } from "./context/AuthContext";
 import { useMonetization } from "./hooks/useMonetization";
 import { usePlayer } from "./hooks/usePlayer";
 import { partyToRaceResult } from "./lib/partyRace";
+import { hasNativeBannerAd } from "./lib/playStore";
 import { AppBannerAd } from "./components/AppBannerAd";
 import { HelpPage } from "./pages/HelpPage";
 import { HomePage } from "./pages/HomePage";
@@ -61,11 +62,13 @@ function App() {
   const { showRewardedAd } = useMonetization(claimAdReward);
 
   function renderWithBanners(content: ReactNode) {
-    const showBottomBanner = page !== "race";
+    // 네이티브 배너가 있으면(Android 래퍼) 웹 배너는 띄우지 않는다 — 이중 노출 방지.
+    const webBanners = !hasNativeBannerAd();
+    const showBottomBanner = webBanners && page !== "race";
 
     return (
       <div className="app-shell">
-        <AppBannerAd position="top" onClick={() => setPage("iaa")} />
+        {webBanners && <AppBannerAd position="top" onClick={() => setPage("iaa")} />}
         <div className="app-shell__content">{content}</div>
         {showBottomBanner && <AppBannerAd position="bottom" onClick={() => setPage("iaa")} />}
       </div>
