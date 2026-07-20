@@ -29,18 +29,33 @@ async function getVerifierKeys(): Promise<Map<string, string>> {
     return keyCache.keys;
   }
 
-  const res = await fetch(VERIFIER_KEYS_URL);
+  let res: Response;
+  try {
+    res = await fetch(VERIFIER_KEYS_URL);
+  } catch (error) {
+    console.log("[adSsv] key fetch threw:", error instanceof Error ? error.message : error);
+    if (keyCache) return keyCache.keys;
+    throw error;
+  }
+
+  console.log("[adSsv] key fetch status:", res.status, "url:", res.url);
+
   if (!res.ok) {
     // 캐시가 있으면 만료됐더라도 쓰는 편이 검증 전면 실패보다 낫다.
     if (keyCache) return keyCache.keys;
     throw new Error(`검증 키를 가져오지 못했어요 (${res.status})`);
   }
 
-  const body = (await res.json()) as { keys?: VerifierKey[] };
+  const rawBody = await res.text();
+  console.log("[adSsv] key fetch body (first 300 chars):", rawBody.slice(0, 300));
+
+  const body = JSON.parse(rawBody) as { keys?: VerifierKey[] };
   const keys = new Map<string, string>();
   for (const key of body.keys ?? []) {
     if (key.keyId && key.pem) keys.set(String(key.keyId), key.pem);
   }
+
+  console.log("[adSsv] parsed keyIds:", [...keys.keys()]);
 
   keyCache = { keys, fetchedAt: Date.now() };
   return keys;
@@ -99,12 +114,26 @@ function base64UrlToBuffer(input: string): Buffer {
 export async function verifySsvSignature(params: SsvParams): Promise<boolean> {
   const keys = await getVerifierKeys();
   const pem = keys.get(params.keyId);
+  console.log(
+    "[adSsv] looking up keyId:",
+    params.keyId,
+    "found:",
+    !!pem,
+    "cachedKeyCount:",
+    keys.size,
+  );
   if (!pem) return false;
 
   if (
     params.timestampMs > 0 &&
     Date.now() - params.timestampMs > CALLBACK_MAX_AGE_MS
   ) {
+    console.log(
+      "[adSsv] timestamp too old:",
+      params.timestampMs,
+      "now:",
+      Date.now(),
+    );
     return false;
   }
 
@@ -112,8 +141,11 @@ export async function verifySsvSignature(params: SsvParams): Promise<boolean> {
     const verifier = createVerify("SHA256");
     verifier.update(params.signedContent);
     verifier.end();
-    return verifier.verify(pem, base64UrlToBuffer(params.signature));
-  } catch {
+    const result = verifier.verify(pem, base64UrlToBuffer(params.signature));
+    console.log("[adSsv] verify() result:", result);
+    return result;
+  } catch (error) {
+    console.log("[adSsv] verify() threw:", error instanceof Error ? error.message : error);
     return false;
   }
 }
