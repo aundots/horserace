@@ -4,7 +4,10 @@
  * 브릿지가 없는 환경(사파리 등 일반 웹)에서는 조용히 미지원으로 떨어진다.
  */
 
-type Reward = { unitType: string; unitAmount: number };
+// requestId 는 AdMob SSV 의 customData 이기도 하다 — claimReward 가 이 값을
+// "ssv:<requestId>" 형태로 서버에 보내면, 서버는 Google 이 보낸 콜백과 대조해서
+// 실제로 광고를 끝까지 봤는지 확인한다 (server/src/routes/ads.ts 의 /ssv, /claim).
+type Reward = { unitType: string; unitAmount: number; requestId?: string };
 type AdEvent = { type: string; data?: Reward };
 type AdHandlers = { onEvent?: (event: AdEvent) => void; onError?: (error: Error) => void };
 
@@ -67,7 +70,10 @@ function ensureBridge() {
 
       switch (type) {
         case "userEarnedReward":
-          handlers.onEvent?.({ type: "userEarnedReward", data: data as Reward });
+          handlers.onEvent?.({
+            type: "userEarnedReward",
+            data: { ...(data as Reward), requestId },
+          });
           break;
         case "dismissed":
           handlers.onEvent?.({ type: "dismissed" });

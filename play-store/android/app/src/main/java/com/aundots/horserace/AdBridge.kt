@@ -11,6 +11,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.google.android.gms.ads.rewarded.ServerSideVerificationOptions
 import org.json.JSONObject
 
 /**
@@ -94,6 +95,14 @@ class AdBridge(
                 loadRewardedInternal()
                 return@runOnUiThread
             }
+
+            // requestId 를 SSV customData 로 실어 보낸다 — 서버가 /ads/ssv 콜백에서
+            // 같은 값을 받아 "이 requestId 로 실제 광고가 끝까지 재생됐다"를 검증한다.
+            ad.setServerSideVerificationOptions(
+                ServerSideVerificationOptions.Builder()
+                    .setCustomData(requestId)
+                    .build(),
+            )
 
             // 보상을 실제로 받았는지 — dismissed 이벤트가 먼저 올 수 있어 플래그로 구분한다.
             var earned = false

@@ -8,6 +8,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 interface Reward {
   unitType: string;
   unitAmount: number;
+  /** Play 빌드 한정: AdMob SSV customData 로 쓰인 nonce. 서버 검증에 필요하다. */
+  requestId?: string;
 }
 
 interface PendingReward {

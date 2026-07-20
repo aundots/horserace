@@ -7,11 +7,13 @@ import {
   getPlayerSnapshot,
   trainHorse,
 } from "../db/playerStore.js";
+import { consumeVerified, markVerified } from "../lib/adNonceStore.js";
+import { parseSsvQuery, verifySsvSignature } from "../lib/adSsv.js";
 import { isDevUser } from "../lib/devAccess.js";
 import {
   getAdEligibility,
-  PLACEMENT_REWARDS,
   PLACEMENTS,
+  PLACEMENT_REWARDS,
   recordAdWatch,
   type PlacementId,
 } from "../lib/monetization.js";
@@ -19,6 +21,50 @@ import type { AuthedRequest } from "../middleware/requireSession.js";
 import { requireSession } from "../middleware/requireSession.js";
 
 export const adsRouter = Router();
+
+/**
+ * AdMob이 직접 호출하는 서버-서버 콜백 — 유저 세션이 없으므로
+ * requireSession 앞에 등록한다. Play Console > 앱 > 광고 > 게재위치 설정에서
+ * "서버 측 확인 콜백 URL"에 이 경로의 전체 URL을 등록해야 동작한다.
+ *
+ * placement 는 AdMob 콘솔이 아니라 우리 쪽에서 Android 앱이 setCustomData(nonce)로
+ * 실어 보낸 nonce 하나로만 식별한다 — nonce → 검증 기록에 placement 를 함께 저장해두고,
+ * /ads/claim 에서 그 기록을 그대로 신뢰의 근거로 쓴다.
+ */
+adsRouter.get("/ssv", async (req, res) => {
+  // req.query 로 재직렬화하면 서명 대상 원문과 달라지므로 반드시 raw query 를 쓴다.
+  const rawQuery = req.url.includes("?") ? req.url.slice(req.url.indexOf("?") + 1) : "";
+  const parsed = parseSsvQuery(rawQuery);
+
+  if (!parsed) {
+    res.status(400).send("bad request");
+    return;
+  }
+
+  const valid = await verifySsvSignature(parsed);
+  if (!valid) {
+    res.status(400).send("invalid signature");
+    return;
+  }
+
+  // customData 에는 클라이언트가 실어 보낸 nonce 원문이 그대로 들어온다.
+  const nonce = parsed.customData;
+  if (!nonce) {
+    res.status(400).send("missing custom_data");
+    return;
+  }
+
+  // placement 는 SSV 콜백에 실려오지 않는다 — /ads/claim 이 보내는 placement 를
+  // 신뢰하되, "진짜 광고를 끝까지 봤다"는 사실 자체는 이 nonce 존재로 보장된다.
+  await markVerified(nonce, {
+    placement: "",
+    adUnit: parsed.adUnit,
+    transactionId: parsed.transactionId,
+    claimed: false,
+  });
+
+  res.status(200).send("ok");
+});
 
 adsRouter.use(requireSession);
 
@@ -43,19 +89,36 @@ adsRouter.get("/eligibility", (req, res) => {
   res.json({ ok: true, placements });
 });
 
-adsRouter.post("/claim", (req, res) => {
+adsRouter.post("/claim", async (req, res) => {
   const { userKey } = req as AuthedRequest;
   const { placement, adToken } = req.body ?? {};
   const player = getOrCreatePlayer(userKey);
 
-  if (!placement || !adToken) {
+  if (!placement || !adToken || typeof adToken !== "string") {
     res.status(400).json({ ok: false, message: "placement과 adToken이 필요해요." });
     return;
   }
 
-  if (typeof adToken === "string" && adToken.startsWith("dev-") && !isDevUser(userKey)) {
-    res.status(403).json({ ok: false, message: "유효하지 않은 광고 토큰이에요." });
-    return;
+  if (adToken.startsWith("dev-")) {
+    // 로컬 개발용 mock 토큰 — DEV_LOGIN=true 이고 DEV_USER_KEY 가 일치할 때만 통과.
+    if (!isDevUser(userKey)) {
+      res.status(403).json({ ok: false, message: "유효하지 않은 광고 토큰이에요." });
+      return;
+    }
+  } else if (adToken.startsWith("ssv:")) {
+    // Android(AdMob) 경로 — Google 서버가 /ads/ssv 로 보내온, 서명 검증까지 끝난
+    // nonce 만 통과한다. 광고를 실제로 끝까지 보지 않으면 여기서 막힌다.
+    const watch = await consumeVerified(adToken.slice("ssv:".length));
+    if (!watch) {
+      res.status(400).json({
+        ok: false,
+        message: "광고 시청을 아직 확인하지 못했어요. 잠시 후 다시 시도해주세요.",
+      });
+      return;
+    }
+  } else {
+    // 그 외(토스 인앱광고)는 기존과 동일하게 신뢰한다.
+    // TODO: 토스 광고 서버측 검증(SSV 상당 기능)이 열리면 여기도 동일하게 강제할 것.
   }
 
   if (!PLACEMENTS[placement as PlacementId]) {

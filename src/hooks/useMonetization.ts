@@ -10,7 +10,16 @@ const AD_DEV_MOCK =
 
 type ClaimResult = { message: string; snapshot: PlayerSnapshot };
 
-function buildRewardToken(reward?: { unitType: string; unitAmount: number }) {
+function buildRewardToken(reward?: {
+  unitType: string;
+  unitAmount: number;
+  requestId?: string;
+}) {
+  // Play 빌드(AdMob)는 requestId가 SSV로 검증된 nonce라서, 이 형태로 보내면
+  // 서버가 실제 시청 여부를 확인하고 보상을 준다. 없으면(토스 인앱광고) 기존 방식.
+  if (reward?.requestId) {
+    return `ssv:${reward.requestId}`;
+  }
   if (reward) {
     return `reward-${Date.now()}-${reward.unitType}-${reward.unitAmount}`;
   }
