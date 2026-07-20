@@ -15,7 +15,7 @@ import { createHash, createVerify } from "node:crypto";
  * 참고: https://developers.google.com/admob/android/ssv
  */
 
-const VERIFIER_KEYS_URL = "https://gstatic.com/admob/reward/verifier-keys.json";
+const VERIFIER_KEYS_URL = "https://www.gstatic.com/admob/reward/verifier-keys.json";
 const KEY_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 /** 오래된 콜백 재사용(replay) 차단 — AdMob 은 보통 수 초 내에 호출한다. */
 const CALLBACK_MAX_AGE_MS = 10 * 60 * 1000;
