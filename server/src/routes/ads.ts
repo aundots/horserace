@@ -48,20 +48,20 @@ adsRouter.get("/ssv", async (req, res) => {
   }
 
   // customData 에는 클라이언트가 실어 보낸 nonce 원문이 그대로 들어온다.
+  // AdMob 콘솔의 "콜백 URL 테스트" 도구는 서명은 진짜로 보내되 custom_data 를
+  // 비워서 호출한다 — 그 연결성 테스트까지 통과시키려면 서명 검증까지만 하고
+  // 200을 돌려주고, nonce 저장은 실제 값이 있을 때만 한다.
   const nonce = parsed.customData;
-  if (!nonce) {
-    res.status(400).send("missing custom_data");
-    return;
+  if (nonce) {
+    // placement 는 SSV 콜백에 실려오지 않는다 — /ads/claim 이 보내는 placement 를
+    // 신뢰하되, "진짜 광고를 끝까지 봤다"는 사실 자체는 이 nonce 존재로 보장된다.
+    await markVerified(nonce, {
+      placement: "",
+      adUnit: parsed.adUnit,
+      transactionId: parsed.transactionId,
+      claimed: false,
+    });
   }
-
-  // placement 는 SSV 콜백에 실려오지 않는다 — /ads/claim 이 보내는 placement 를
-  // 신뢰하되, "진짜 광고를 끝까지 봤다"는 사실 자체는 이 nonce 존재로 보장된다.
-  await markVerified(nonce, {
-    placement: "",
-    adUnit: parsed.adUnit,
-    transactionId: parsed.transactionId,
-    claimed: false,
-  });
 
   res.status(200).send("ok");
 });
