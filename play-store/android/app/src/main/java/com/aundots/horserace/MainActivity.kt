@@ -34,15 +34,6 @@ class MainActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = Color.parseColor("#3182F6")
 
-        // TODO(임시 디버그): 배너가 안 보이는 원인(no-fill 인지, 다른 에러인지)을
-        // adb 없이 바로 확인하려고 토스트로 띄운다. 원인 파악되면 제거할 것.
-        MobileAds.initialize(this) { status ->
-            val states = status.adapterStatusMap.entries.joinToString { (name, s) ->
-                "$name=${s.initializationState}"
-            }
-            Toast.makeText(this, "AdMob 초기화: $states", Toast.LENGTH_LONG).show()
-        }
-
         webView = WebView(this)
         bannerView = AdView(this).apply {
             adUnitId = BuildConfig.ADMOB_BANNER_ID
@@ -118,7 +109,12 @@ class MainActivity : AppCompatActivity() {
         }
         webView.loadUrl("https://aundots.github.io/horserace/play/")
 
-        bannerView.loadAd(AdRequest.Builder().build())
+        // 배너는 onCreate 안에서 바로 로드 요청을 보내는 유일한 광고라 SDK 초기화
+        // 완료 전에 요청이 나가기 쉽다(code=0 ERROR_CODE_INTERNAL_ERROR로 관찰됨).
+        // 보상형/전면은 JS가 WebView 로드 이후에 호출해서 초기화가 이미 끝나 있다.
+        MobileAds.initialize(this) {
+            bannerView.loadAd(AdRequest.Builder().build())
+        }
 
         onBackPressedDispatcher.addCallback(
             this,
