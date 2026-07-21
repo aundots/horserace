@@ -9,6 +9,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.LinearLayout
+import android.widget.ScrollView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -44,12 +46,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
-                    // Toast는 길면 잘려서 "..."로 표시된다 — 전체 메시지를 보려면 다이얼로그로.
-                    android.app.AlertDialog.Builder(this@MainActivity)
-                        .setTitle("배너 로드 실패 (code=${error.code})")
-                        .setMessage("domain=${error.domain}\n\n${error.message}")
-                        .setPositiveButton("확인", null)
-                        .show()
+                    showAdDiagnostics(error)
                 }
             }
         }
@@ -125,6 +122,60 @@ class MainActivity : AppCompatActivity() {
                 }
             },
         )
+    }
+
+    /**
+     * TODO(임시 진단): 광고 로드 실패 원인을 USB 없이 보기 위한 화면.
+     * 앱은 자기 프로세스의 logcat 만 읽을 수 있는데, GMA SDK 도 같은 프로세스에서
+     * 로그를 남기므로 실제 실패 스택을 그대로 확인할 수 있다. 원인 확정되면 제거.
+     */
+    private fun showAdDiagnostics(error: LoadAdError) {
+        val header = buildString {
+            appendLine("code=${error.code}  domain=${error.domain}")
+            appendLine("msg=${error.message}")
+            appendLine("cause=${error.cause}")
+            appendLine()
+            appendLine("adUnit=${BuildConfig.ADMOB_BANNER_ID}")
+            appendLine("webViewPkg=${webViewPackageInfo()}")
+            appendLine("android=${android.os.Build.VERSION.SDK_INT}  ${android.os.Build.MODEL}")
+            appendLine()
+            appendLine("---- logcat ----")
+        }
+
+        val body = TextView(this).apply {
+            text = header + readAdsLogcat()
+            textSize = 10f
+            setTextIsSelectable(true)
+            setPadding(32, 32, 32, 32)
+        }
+
+        android.app.AlertDialog.Builder(this)
+            .setTitle("광고 진단")
+            .setView(ScrollView(this).apply { addView(body) })
+            .setPositiveButton("확인", null)
+            .show()
+    }
+
+    private fun webViewPackageInfo(): String = try {
+        val pkg = WebView.getCurrentWebViewPackage()
+        "${pkg?.packageName} ${pkg?.versionName}"
+    } catch (e: Throwable) {
+        "조회 실패: ${e.message}"
+    }
+
+    private fun readAdsLogcat(): String = try {
+        val proc = Runtime.getRuntime()
+            .exec(arrayOf("logcat", "-d", "-v", "brief", "-t", "600"))
+        val keywords = listOf("ads", "webview", "javascriptengine", "chromium", "gms")
+        proc.inputStream.bufferedReader().useLines { lines ->
+            lines
+                .filter { line -> keywords.any { line.contains(it, ignoreCase = true) } }
+                .toList()
+                .takeLast(60)
+                .joinToString("\n")
+        }.ifBlank { "(관련 로그 없음)" }
+    } catch (e: Throwable) {
+        "logcat 읽기 실패: ${e.message}"
     }
 
     /** 화면 폭에 맞춘 앵커 배너 — 고정 320x50 보다 채움률과 eCPM 이 높다. */
