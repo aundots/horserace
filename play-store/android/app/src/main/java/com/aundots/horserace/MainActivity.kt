@@ -134,6 +134,10 @@ class MainActivity : AppCompatActivity() {
         return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, widthDp)
     }
 
+    // NOTE: getCurrentOrientationAnchoredAdaptiveBannerAdSize 는 25.x 에서 deprecated 지만,
+    // 대체 API(inline adaptive)는 배너 높이가 가변이라 하단 고정 앵커 배너와 맞지 않는다.
+    // 동작에는 문제가 없어 그대로 둔다.
+
     override fun onPause() {
         bannerView.pause()
         super.onPause()
