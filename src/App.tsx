@@ -27,6 +27,13 @@ type Page =
   | "settings"
   | "iaa";
 
+declare global {
+  interface Window {
+    /** MainActivity 의 하드웨어 뒤로가기 브릿지. false=처리함(홈으로 이동), true=네이티브가 종료. */
+    __horseraceBack?: () => boolean;
+  }
+}
+
 function readPartyDeepLink(): string | undefined {
   if (typeof window === "undefined") return undefined;
   try {
@@ -82,6 +89,21 @@ function App() {
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
   }, []);
+
+  // Android 하드웨어 뒤로가기 — 브라우저 히스토리가 아니라 이 콜백으로 판단한다.
+  // page 는 순수 React state라 실제 History 엔트리가 안 쌓여서 canGoBack()이 항상
+  // false였고, 그래서 어느 화면에서든 뒤로가기 한 번에 앱이 꺼졌다. 홈이 아니면
+  // 홈으로 보내고, 이미 홈이면 true를 돌려줘서 네이티브가 앱을 종료하게 한다.
+  useEffect(() => {
+    window.__horseraceBack = () => {
+      if (page === "home") return true;
+      setPage("home");
+      return false;
+    };
+    return () => {
+      delete window.__horseraceBack;
+    };
+  }, [page]);
 
   useEffect(() => {
     if (!sessionId) return;

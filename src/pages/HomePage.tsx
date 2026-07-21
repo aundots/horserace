@@ -142,7 +142,7 @@ export function HomePage({
                 demoLogin();
               }}
             >
-              다시 체험하기
+              다시 불러오기
             </Button>
           ) : (
             <Button

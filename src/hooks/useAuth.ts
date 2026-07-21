@@ -77,10 +77,9 @@ export function useAuth() {
       localStorage.setItem(SESSION_KEY, result.sessionId);
       setSessionId(result.sessionId);
       setUserKey(result.userKey);
-      toast.openToast("체험 모드로 시작했어요.", { type: "success" });
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "체험 로그인에 실패했어요.";
+        error instanceof Error ? error.message : "로그인에 실패했어요.";
       toast.openToast(message, { type: "bottom" });
     }
   }, [toast]);

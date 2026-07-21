@@ -9,19 +9,14 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.LinearLayout
-import android.widget.ScrollView
-import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 
 class MainActivity : AppCompatActivity() {
@@ -40,15 +35,6 @@ class MainActivity : AppCompatActivity() {
         bannerView = AdView(this).apply {
             adUnitId = BuildConfig.ADMOB_BANNER_ID
             setAdSize(adaptiveBannerSize())
-            adListener = object : AdListener() {
-                override fun onAdLoaded() {
-                    Toast.makeText(this@MainActivity, "배너 로드 성공", Toast.LENGTH_SHORT).show()
-                }
-
-                override fun onAdFailedToLoad(error: LoadAdError) {
-                    showAdDiagnostics(error)
-                }
-            }
         }
 
         // WebView(가변) + 하단 고정 배너 1개. 배너를 여러 개 쌓으면 AdMob 광고 밀도 정책 위반.
@@ -108,8 +94,8 @@ class MainActivity : AppCompatActivity() {
         webView.loadUrl("https://aundots.github.io/horserace/play/")
 
         // 배너는 onCreate 안에서 바로 로드 요청을 보내는 유일한 광고라 SDK 초기화
-        // 완료 전에 요청이 나가기 쉽다(code=0 ERROR_CODE_INTERNAL_ERROR로 관찰됨).
-        // 보상형/전면은 JS가 WebView 로드 이후에 호출해서 초기화가 이미 끝나 있다.
+        // 완료 전에 요청이 나가기 쉽다. 보상형/전면은 JS가 WebView 로드 이후에
+        // 호출해서 초기화가 이미 끝나 있다.
         MobileAds.initialize(this) {
             bannerView.loadAd(AdRequest.Builder().build())
         }
@@ -118,64 +104,18 @@ class MainActivity : AppCompatActivity() {
             this,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    if (webView.canGoBack()) webView.goBack() else finish()
+                    // page 는 React state 라 실제 브라우저 히스토리가 안 쌓여서
+                    // canGoBack()은 늘 false다 — 대신 앱(App.tsx)에 직접 물어본다.
+                    // window.__horseraceBack() 이 false 면 앱이 알아서 홈으로
+                    // 이동했다는 뜻이라 그대로 두고, true(=이미 홈)면 액티비티를 닫는다.
+                    webView.evaluateJavascript(
+                        "(window.__horseraceBack ? window.__horseraceBack() : true).toString()",
+                    ) { result ->
+                        if (result == "true") finish()
+                    }
                 }
             },
         )
-    }
-
-    /**
-     * TODO(임시 진단): 광고 로드 실패 원인을 USB 없이 보기 위한 화면.
-     * 앱은 자기 프로세스의 logcat 만 읽을 수 있는데, GMA SDK 도 같은 프로세스에서
-     * 로그를 남기므로 실제 실패 스택을 그대로 확인할 수 있다. 원인 확정되면 제거.
-     */
-    private fun showAdDiagnostics(error: LoadAdError) {
-        val header = buildString {
-            appendLine("code=${error.code}  domain=${error.domain}")
-            appendLine("msg=${error.message}")
-            appendLine("cause=${error.cause}")
-            appendLine()
-            appendLine("adUnit=${BuildConfig.ADMOB_BANNER_ID}")
-            appendLine("webViewPkg=${webViewPackageInfo()}")
-            appendLine("android=${android.os.Build.VERSION.SDK_INT}  ${android.os.Build.MODEL}")
-            appendLine()
-            appendLine("---- logcat ----")
-        }
-
-        val body = TextView(this).apply {
-            text = header + readAdsLogcat()
-            textSize = 10f
-            setTextIsSelectable(true)
-            setPadding(32, 32, 32, 32)
-        }
-
-        android.app.AlertDialog.Builder(this)
-            .setTitle("광고 진단")
-            .setView(ScrollView(this).apply { addView(body) })
-            .setPositiveButton("확인", null)
-            .show()
-    }
-
-    private fun webViewPackageInfo(): String = try {
-        val pkg = WebView.getCurrentWebViewPackage()
-        "${pkg?.packageName} ${pkg?.versionName}"
-    } catch (e: Throwable) {
-        "조회 실패: ${e.message}"
-    }
-
-    private fun readAdsLogcat(): String = try {
-        val proc = Runtime.getRuntime()
-            .exec(arrayOf("logcat", "-d", "-v", "brief", "-t", "600"))
-        val keywords = listOf("ads", "webview", "javascriptengine", "chromium", "gms")
-        proc.inputStream.bufferedReader().useLines { lines ->
-            lines
-                .filter { line -> keywords.any { line.contains(it, ignoreCase = true) } }
-                .toList()
-                .takeLast(60)
-                .joinToString("\n")
-        }.ifBlank { "(관련 로그 없음)" }
-    } catch (e: Throwable) {
-        "logcat 읽기 실패: ${e.message}"
     }
 
     /** 화면 폭에 맞춘 앵커 배너 — 고정 320x50 보다 채움률과 eCPM 이 높다. */
@@ -184,10 +124,6 @@ class MainActivity : AppCompatActivity() {
         val widthDp = (widthPx / resources.displayMetrics.density).toInt()
         return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, widthDp)
     }
-
-    // NOTE: getCurrentOrientationAnchoredAdaptiveBannerAdSize 는 25.x 에서 deprecated 지만,
-    // 대체 API(inline adaptive)는 배너 높이가 가변이라 하단 고정 앵커 배너와 맞지 않는다.
-    // 동작에는 문제가 없어 그대로 둔다.
 
     override fun onPause() {
         bannerView.pause()
