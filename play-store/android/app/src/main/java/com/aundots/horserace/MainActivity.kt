@@ -9,14 +9,17 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 
 class MainActivity : AppCompatActivity() {
@@ -31,12 +34,32 @@ class MainActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = Color.parseColor("#3182F6")
 
-        MobileAds.initialize(this)
+        // TODO(임시 디버그): 배너가 안 보이는 원인(no-fill 인지, 다른 에러인지)을
+        // adb 없이 바로 확인하려고 토스트로 띄운다. 원인 파악되면 제거할 것.
+        MobileAds.initialize(this) { status ->
+            val states = status.adapterStatusMap.entries.joinToString { (name, s) ->
+                "$name=${s.initializationState}"
+            }
+            Toast.makeText(this, "AdMob 초기화: $states", Toast.LENGTH_LONG).show()
+        }
 
         webView = WebView(this)
         bannerView = AdView(this).apply {
             adUnitId = BuildConfig.ADMOB_BANNER_ID
             setAdSize(adaptiveBannerSize())
+            adListener = object : AdListener() {
+                override fun onAdLoaded() {
+                    Toast.makeText(this@MainActivity, "배너 로드 성공", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "배너 로드 실패: code=${error.code} domain=${error.domain} msg=${error.message}",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+            }
         }
 
         // WebView(가변) + 하단 고정 배너 1개. 배너를 여러 개 쌓으면 AdMob 광고 밀도 정책 위반.
