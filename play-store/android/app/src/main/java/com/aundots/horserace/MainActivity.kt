@@ -44,11 +44,12 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
-                    Toast.makeText(
-                        this@MainActivity,
-                        "배너 로드 실패: code=${error.code} domain=${error.domain} msg=${error.message}",
-                        Toast.LENGTH_LONG,
-                    ).show()
+                    // Toast는 길면 잘려서 "..."로 표시된다 — 전체 메시지를 보려면 다이얼로그로.
+                    android.app.AlertDialog.Builder(this@MainActivity)
+                        .setTitle("배너 로드 실패 (code=${error.code})")
+                        .setMessage("domain=${error.domain}\n\n${error.message}")
+                        .setPositiveButton("확인", null)
+                        .show()
                 }
             }
         }
