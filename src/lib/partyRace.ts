@@ -57,5 +57,6 @@ export function partyToRaceResult(
     hitBox: null,
     loopBonus: null,
     partyRaceNumber: cr.raceNumber,
+    raceStartedAt: cr.raceStartedAt,
   };
 }

@@ -149,6 +149,8 @@ export type RaceResult = {
   hitBox?: null;
   loopBonus?: RaceLoopBonus | null;
   partyRaceNumber?: number;
+  /** party 모드에서만 존재 — 서버가 결과를 계산한 시각(epoch ms), 재생 동기화용. */
+  raceStartedAt?: number;
 };
 
 export type PartyMemberResult = {
@@ -184,6 +186,7 @@ export type PartySnapshot = {
   revealedTipCards: TipCard[];
   clientResult: {
     raceNumber: number;
+    raceStartedAt: number;
     finishOrder: number[];
     entrants: RaceEntrant[];
     condition: RaceResult["condition"];

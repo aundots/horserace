@@ -31,6 +31,10 @@ export type PartyMember = {
 
 export type PartyClientResult = {
   raceNumber: number;
+  /** 서버가 결과를 계산한 시각(epoch ms) — 클라이언트가 폴링으로 뒤늦게 발견해도
+   * 이 시각 기준으로 재생 위치를 맞춰서 방장이 시작을 눌렀을 때 모두 동시에
+   * 시작한 것처럼 보이게 한다. */
+  raceStartedAt: number;
   finishOrder: number[];
   entrants: ReturnType<typeof buildEntrants>;
   condition: RaceCondition;
@@ -406,6 +410,7 @@ export async function runPartyRace(userKey: number, partyCode?: string) {
 
   room.clientResult = {
     raceNumber: room.raceNumber,
+    raceStartedAt: Date.now(),
     finishOrder: sim.finishOrder,
     entrants,
     condition: room.condition,

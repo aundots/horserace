@@ -116,10 +116,13 @@ export function PartyPage({
 
   useEffect(() => {
     if (!party) return;
-    // done 상태에서도 폴링 유지 — 방장이 다음 경기를 준비(picking)하면 비방장도 감지해야 함
+    // done 상태에서도 폴링 유지 — 방장이 다음 경기를 준비(picking)하면 비방장도 감지해야 함.
+    // picking 중엔 방장이 "경주 시작"을 언제 누를지 몰라서 더 촘촘히 본다 — 발견이
+    // 빠를수록 useRacePlayback 의 따라잡기 폭도 작아져서 체감 동기화가 좋아진다.
+    const interval = party.status === "picking" ? 900 : 2000;
     const timer = setInterval(() => {
       refresh().catch(() => undefined);
-    }, 2000);
+    }, interval);
     return () => clearInterval(timer);
   }, [party?.code, party?.status, refresh]);
 

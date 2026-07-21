@@ -6,8 +6,10 @@ import { RacePartyPicks } from "../components/RacePartyPicks";
 import { RaceCommentaryBar } from "../components/RaceCommentaryBar";
 import { RaceHorseIcon } from "../components/RaceHorseIcon";
 import { RaceTrackScene } from "../components/RaceTrackScene";
+import { WhipTapButton } from "../components/WhipTapButton";
 import { useRaceCommentary } from "../hooks/useRaceCommentary";
 import { useRacePlayback } from "../hooks/useRacePlayback";
+import { useWhipTap } from "../hooks/useWhipTap";
 import {
   buildInterpolatedHorses,
   getRaceKeyframe,
@@ -71,8 +73,13 @@ export function RacePage({
   const lateralRef = useRef(new Map<number, number>());
   const positionRef = useRef(new Map<number, import("../lib/ovalTrack").HorsePoint>());
   const metersRef = useRef(new Map<number, number>());
-  const raceProgress = useRacePlayback(started, finished);
+  const raceProgress = useRacePlayback(
+    started,
+    finished,
+    result.mode === "party" ? result.raceStartedAt : undefined,
+  );
   const horseSize = raceHorseIconSize(dims.height);
+  const whip = useWhipTap(raceProgress, started, finished);
 
   const layout = useMemo(
     () => getOvalLayout(undefined, undefined, result.condition.distance),
@@ -96,6 +103,17 @@ export function RacePage({
     const onResize = () => setDims(viewportDimensions());
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // 파티 모드는 방장이 이미 "경주 시작"을 눌러서 결과가 확정된 뒤에 화면에
+  // 들어온다 — 여기서 또 한 번 각자 누르게 하면 그 텀만큼 참가자마다 재생
+  // 시작 시각이 달라진다. 진입과 동시에 자동 재생하고, raceStartedAt 기반
+  // 따라잡기(useRacePlayback)로 실제 화면 동기화를 맞춘다.
+  useEffect(() => {
+    if (result.mode !== "party") return;
+    prepareRaceAudio();
+    setStarted(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -333,21 +351,37 @@ export function RacePage({
         }
         footer={
           started && !finished ? (
-            <RaceCommentaryBar line={commentary} visible overlay />
+            <>
+              <WhipTapButton
+                visible={whip.active}
+                combo={whip.combo}
+                effect={whip.effect}
+                onTap={whip.tap}
+              />
+              <RaceCommentaryBar line={commentary} visible overlay />
+            </>
           ) : null
         }
       >
         {horseStates.map(({ number, pos }) => {
           const entrant = entrantMap.get(number);
+          const isMine = number === pickedNumber;
+          const whipClass =
+            isMine && whip.effect === "great"
+              ? " horse-boost"
+              : isMine && whip.effect === "miss"
+                ? " horse-stumble"
+                : "";
           return (
             <div
               key={number}
+              className={whipClass || undefined}
               style={{
                 position: "absolute",
                 left: pos.x,
                 top: pos.y,
                 transform: "translate(-50%, -88%)",
-                zIndex: number === pickedNumber ? 3 : 2,
+                zIndex: isMine ? 3 : 2,
               }}
             >
               <RaceHorseIcon
