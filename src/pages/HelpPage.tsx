@@ -19,14 +19,15 @@ export function HelpPage({ onBack }: HelpPageProps) {
 
         <h3 style={{ fontSize: 16, margin: "16px 0 8px" }}>경주 티켓 · 광고</h3>
         <p>
-          <strong>하루 1회</strong> 무료 경주 후, 추가 경주는 <strong>광고 시청으로 티켓</strong>을
-          받아야 합니다. 티켓이 없으면 완주 화면에서 「광고 보고 티켓 · 다음 경주」를 이용하세요.
+          <strong>하루 5회</strong> 무료 경주 후, 추가 경주는 <strong>광고 시청으로 티켓</strong>을
+          받아야 합니다(하루 최대 20회). 티켓이 없으면 완주 화면에서 「광고 보고 티켓 · 다음 경주」를
+          이용하세요.
         </p>
 
         <h3 style={{ fontSize: 16, margin: "16px 0 8px" }}>찌라시 P</h3>
         <p>
           말마다 1~3P로 찌라시를 엽니다. P가 부족하면 <strong>광고로 P+4</strong>를 받을 수
-          있어요. 티켓이 남아 있을 때 경주 사이 광고는 P 보충용입니다.
+          있어요(하루 최대 15회). 티켓이 남아 있을 때 경주 사이 광고는 P 보충용입니다.
         </p>
 
         <h3 style={{ fontSize: 16, margin: "16px 0 8px" }}>친구와 맞추기 (내기)</h3>
@@ -46,7 +47,7 @@ export function HelpPage({ onBack }: HelpPageProps) {
         <ul style={{ paddingLeft: 20, margin: 0 }}>
           <li>완주 후 <strong>바로 다음 경주</strong>로 이어서 플레이할 수 있어요.</li>
           <li><strong>3경주 연속</strong> 완주 시 찌라시 무료 1장이 지급됩니다.</li>
-          <li>하루 <strong>5경주</strong> 완주 시 골드 보너스가 지급됩니다.</li>
+          <li>하루 <strong>5경주</strong> 완주 시 골드 보너스 <strong>+80G</strong>가 지급됩니다.</li>
           <li>홈으로 가면 연속 출전 스트릭이 초기화됩니다.</li>
         </ul>
 
@@ -57,8 +58,8 @@ export function HelpPage({ onBack }: HelpPageProps) {
 
         <h3 style={{ fontSize: 16, margin: "16px 0 8px" }}>낙마·사고</h3>
         <p>
-          <strong>단독 낙마</strong> — 플랫 경주 기준 약 <strong>0.14%/구간</strong> (JRA 통계
-          참고). 코너·피로·컨디션에 따라 달라집니다.
+          <strong>단독 낙마</strong> — 구간당 기본 확률은 낮게 설정되어 있고, 코너·피로·컨디션에
+          따라 달라집니다.
         </p>
         <p style={{ marginTop: 8 }}>
           <strong>간섭 사고</strong> — 말들이 좁은 주로에서 엉켜 달릴 때 추가로 발생합니다.
