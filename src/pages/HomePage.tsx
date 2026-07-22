@@ -293,15 +293,20 @@ export function HomePage({
           )}
 
           <div style={{ display: "grid", gap: 8 }}>
-            {canRace && ticketAd?.eligible && (
+            {canRace && ticketAd && ticketAd.remaining.daily > 0 && (
+              // 쿨다운 등으로 잠시 못 받을 때도 버튼을 숨기지 말고 비활성으로 남긴다
+              // — 갑자기 사라지면 "받기가 없어졌다"고 오해하기 쉽다.
               <Button
                 display="block"
                 size="large"
                 color="dark"
                 variant="weak"
+                disabled={!ticketAd.eligible}
                 onClick={() => watchAd("AD_RANK_TICKET", "경주 티켓 획득")}
               >
-                광고로 티켓 미리 받기 +1 (오늘 {ticketAd.remaining.daily}회)
+                {ticketAd.eligible
+                  ? `광고로 티켓 미리 받기 +1 (오늘 ${ticketAd.remaining.daily}회)`
+                  : ticketAd.reason ?? "잠시 후 다시 받을 수 있어요"}
               </Button>
             )}
             {(lowPoints || !canRace) && (
