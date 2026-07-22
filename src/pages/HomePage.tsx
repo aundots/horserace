@@ -244,7 +244,7 @@ export function HomePage({
             <StatPill label="찌라시 P" value={`${s.predictionPoints}`} />
             <StatPill
               label="경주 티켓"
-              value={`${s.rankedTicketsLeft}/${s.rankedTicketsMax}`}
+              value={`${s.rankedTicketsLeft}`}
             />
           </div>
 
