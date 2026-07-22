@@ -36,13 +36,13 @@ object Admob {
 
 android {
     namespace = "com.aundots.horserace"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.aundots.horserace"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 13
+        targetSdk = 36
+        versionCode = 14
         versionName = "1.0.6"
 
     }
