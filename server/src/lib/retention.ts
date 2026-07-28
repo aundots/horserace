@@ -64,16 +64,32 @@ export function checkPokedexUnlocks(state: {
   return newUnlocks;
 }
 
+/**
+ * 출석 보상. 골드는 유지하되 찌라시 P 를 함께 준다 — 골드는 현재 소비처가
+ * 사실상 없고(상점 UI 미구현, 티켓 골드구매 비활성), 실제로 매 경주 쓰이는
+ * 재화는 찌라시 P 라서 출석의 체감 가치를 P 로 만든다.
+ */
 export function attendanceReward(dayIndex: number) {
-  if (dayIndex === 6) return { gold: 70, label: "7일차 보너스" };
-  if (dayIndex === 13) return { gold: 100, label: "14일차 보너스" };
-  if (dayIndex === 27) return { gold: 200, label: "28일차 보너스" };
-  return { gold: 10 + dayIndex * 2, label: `${dayIndex + 1}일차` };
+  if (dayIndex === 6) return { gold: 70, points: 8, label: "7일차 보너스" };
+  if (dayIndex === 13) return { gold: 100, points: 10, label: "14일차 보너스" };
+  if (dayIndex === 27) return { gold: 200, points: 15, label: "28일차 보너스" };
+  // 1일차 3P 에서 시작해 최대 8P 까지 — 한 경주 찌라시 몇 장 값.
+  return {
+    gold: 10 + dayIndex * 2,
+    points: Math.min(8, 3 + Math.floor(dayIndex / 4)),
+    label: `${dayIndex + 1}일차`,
+  };
 }
 
 export function streakGoldReward(streak: number) {
   const table = [10, 15, 20, 30, 40, 50, 70];
   return table[Math.min(streak - 1, table.length - 1)] ?? 10;
+}
+
+/** 연속 접속 보상의 찌라시 P — 골드 테이블과 같은 계단으로 1~5P. */
+export function streakPointsReward(streak: number) {
+  const table = [1, 1, 2, 2, 3, 4, 5];
+  return table[Math.min(streak - 1, table.length - 1)] ?? 1;
 }
 
 export function isNewbieShield(createdAt: Date, now = new Date()) {

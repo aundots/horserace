@@ -1,4 +1,5 @@
 import { colors } from "@toss/tds-colors";
+import { useT } from "../i18n/LangContext";
 import { entrantAptTags, statBarPct } from "../lib/entrantBrief";
 import { formatJockey } from "../lib/jockey";
 import { PARTY_TIPS_PER_RACE } from "../lib/partyScoring";
@@ -84,7 +85,8 @@ export function EntrantPickCard({
   onSelect,
   onRevealTip,
 }: EntrantPickCardProps) {
-  const tags = entrantAptTags(entrant, raceTrack, raceDistance);
+  const t = useT();
+  const tags = entrantAptTags(t, entrant, raceTrack, raceDistance);
   const canAfford = freeTipReveals > 0 || predictionPoints >= openCost;
   const showTips = partyTips || !hideTips;
   const canRevealPartyTip = partyTips && tipsRemaining > 0 && !revealedTip;
@@ -134,7 +136,7 @@ export function EntrantPickCard({
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
               <span style={{ fontWeight: 800, fontSize: 15, color: colors.grey900 }}>
-                {entrant.number}번 {entrant.name}
+                {t.horseEntry(entrant.number, entrant.name)}
               </span>
               {selected && (
                 <span
@@ -147,7 +149,7 @@ export function EntrantPickCard({
                     color: "#fff",
                   }}
                 >
-                  내 말
+                  {t.myHorse}
                 </span>
               )}
               {takenByOther && (
@@ -161,17 +163,17 @@ export function EntrantPickCard({
                     color: colors.grey700,
                   }}
                 >
-                  선택됨
+                  {t.taken}
                 </span>
               )}
               {!anonymous && entrant.isGhost && (
-                <span style={{ fontSize: 11, color: colors.grey600 }}>고스트</span>
+                <span style={{ fontSize: 11, color: colors.grey600 }}>{t.ghost}</span>
               )}
             </div>
 
             {anonymous ? (
               <p style={{ fontSize: 12, color: colors.grey600, margin: "6px 0 0", lineHeight: 1.4 }}>
-                스탯·기수 비공개 · 이름으로 응원 · 찌라시로 힌트
+                {t.anonymousHint}
               </p>
             ) : (
               <>
@@ -219,9 +221,9 @@ export function EntrantPickCard({
                 </div>
 
                 <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                  <StatMini label="스피드" value={entrant.speed} />
-                  <StatMini label="스태" value={entrant.stamina} />
-                  <StatMini label="가속" value={entrant.accel} />
+                  <StatMini label={t.statSpeed} value={entrant.speed} />
+                  <StatMini label={t.statStamina} value={entrant.stamina} />
+                  <StatMini label={t.statAccel} value={entrant.accel} />
                 </div>
               </>
             )}
@@ -295,16 +297,16 @@ export function EntrantPickCard({
               }}
             >
               {revealing
-                ? "여는 중..."
+                ? t.tipOpening
                 : partyTips
                   ? canRevealPartyTip
-                    ? `🔍 찌라시 열기 (남은 ${tipsRemaining}/${PARTY_TIPS_PER_RACE}장)`
-                    : `찌라시 ${PARTY_TIPS_PER_RACE}장 모두 사용`
+                    ? t.tipOpenParty(tipsRemaining, PARTY_TIPS_PER_RACE)
+                    : t.tipAllUsed(PARTY_TIPS_PER_RACE)
                   : canAfford
                     ? freeTipReveals > 0
-                      ? `🎁 찌라시 무료 열기 (보너스 ${freeTipReveals}장)`
-                      : `🔒 찌라시 열기 (${openCost}P)`
-                    : `예상 포인트 부족 (${openCost}P 필요)`}
+                      ? t.tipOpenFree(freeTipReveals)
+                      : t.tipOpen(openCost)
+                    : t.tipNoPoints(openCost)}
             </button>
           )}
         </div>

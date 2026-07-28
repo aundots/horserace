@@ -1,11 +1,22 @@
-import { getTipGradeMeta } from "../lib/tipGrade";
+import { useT } from "../i18n/LangContext";
+import { getTipGradeMeta, resolveTipGrade } from "../lib/tipGrade";
+import type { STRINGS } from "../i18n/strings";
 
 type TipGradeBadgeProps = {
   grade: string;
   compact?: boolean;
 };
 
+function gradeLabel(t: (typeof STRINGS)["ko"], grade: string): string {
+  const resolved = resolveTipGrade(grade);
+  if (resolved === "SURE") return t.gradeSure;
+  if (resolved === "LIKELY") return t.gradeLikely;
+  if (resolved === "TRAP") return t.gradeTrap;
+  return t.gradeRumor;
+}
+
 export function TipGradeBadge({ grade, compact = false }: TipGradeBadgeProps) {
+  const t = useT();
   const meta = getTipGradeMeta(grade);
 
   return (
@@ -36,7 +47,7 @@ export function TipGradeBadge({ grade, compact = false }: TipGradeBadgeProps) {
       >
         {meta.arrows}
       </span>
-      <span>{meta.label}</span>
+      <span>{gradeLabel(t, grade)}</span>
     </span>
   );
 }

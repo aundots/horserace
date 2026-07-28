@@ -1,5 +1,6 @@
 import { colors } from "@toss/tds-colors";
 import { Button, Top } from "@toss/tds-mobile";
+import { useT } from "../i18n/LangContext";
 import type { PlayerSnapshot } from "../types/game";
 
 interface MissionsPageProps {
@@ -13,20 +14,22 @@ export function MissionsPage({
   claimAttendance,
   onBack,
 }: MissionsPageProps) {
+  const t = useT();
+
   return (
     <>
       <Top
-        title={<Top.TitleParagraph size={22}>출석 보상</Top.TitleParagraph>}
+        title={<Top.TitleParagraph size={22}>{t.attendanceTitle}</Top.TitleParagraph>}
         subtitleBottom={
           <Top.SubtitleParagraph size={15}>
-            스트릭 {snapshot.streak}일 · 골드 {snapshot.gold}G
+            {t.attendanceSubtitle(snapshot.streak, snapshot.predictionPoints)}
           </Top.SubtitleParagraph>
         }
       />
 
       <div style={{ padding: "0 20px 16px" }}>
         <p style={{ fontSize: 14, color: colors.grey600, lineHeight: 1.55, margin: "0 0 16px" }}>
-          매일 출석하면 골드가 지급됩니다. 골드는 추가 경주 티켓 구매에 사용할 수 있어요.
+          {t.attendanceDesc}
         </p>
         <Button
           display="block"
@@ -35,14 +38,14 @@ export function MissionsPage({
           onClick={claimAttendance}
         >
           {snapshot.attendanceClaimedToday
-            ? `오늘 출석 완료 (${snapshot.attendanceIndex}/28)`
-            : "오늘 출석하기"}
+            ? t.attendanceDone(snapshot.attendanceIndex)
+            : t.attendanceClaim}
         </Button>
       </div>
 
       <div style={{ padding: "0 20px 24px" }}>
         <Button display="block" size="large" color="dark" variant="weak" onClick={onBack}>
-          돌아가기
+          {t.back}
         </Button>
       </div>
     </>

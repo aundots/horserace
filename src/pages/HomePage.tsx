@@ -9,6 +9,8 @@ import {
   useToast,
 } from "@toss/tds-mobile";
 import { useEffect, useRef, useState } from "react";
+import { useLang } from "../i18n/LangContext";
+import { translateServerMessage } from "../i18n/serverMessages";
 import { showDevAdsLink } from "../lib/devAccess";
 import type { useAuth } from "../hooks/useAuth";
 import type { usePlayer } from "../hooks/usePlayer";
@@ -41,6 +43,7 @@ export function HomePage({
   onStartPredict,
 }: HomePageProps) {
   const toast = useToast();
+  const { lang, t } = useLang();
   const { isLoggedIn, loading, login, demoLogin, isPlayStore, logout } =
     auth;
   const {
@@ -80,24 +83,30 @@ export function HomePage({
         predictionPoints: prepare.predictionPoints,
       });
     } catch (error) {
-      toast.openToast(
-        error instanceof Error ? error.message : "경주를 준비할 수 없어요.",
-        { type: "bottom" },
-      );
+      toast.openToast(errorText(error, "경주를 준비할 수 없어요."), {
+        type: "bottom",
+      });
     }
+  }
+
+  /** 서버 메시지는 한글로 오므로 표시 직전에 현재 언어로 옮긴다. */
+  function errorText(error: unknown, fallback: string) {
+    const raw = error instanceof Error ? error.message : fallback;
+    return translateServerMessage(raw, lang);
   }
 
   async function watchAd(placement: string, label: string) {
     try {
       const res = await showRewardedAd(placement);
-      toast.openToast(res.message || label, { type: "success" });
+      toast.openToast(translateServerMessage(res.message || label, lang), {
+        type: "success",
+      });
       const next = await getAdEligibility();
       setAdPlacements(next);
     } catch (error) {
-      toast.openToast(
-        error instanceof Error ? error.message : "광고 보상을 받을 수 없어요.",
-        { type: "bottom" },
-      );
+      toast.openToast(errorText(error, "광고 보상을 받을 수 없어요."), {
+        type: "bottom",
+      });
     }
   }
 
@@ -108,9 +117,9 @@ export function HomePage({
   if (loading || (isLoggedIn && playerLoading && !snapshot)) {
     return (
       <Top
-        title={<Top.TitleParagraph size={22}>말달리자</Top.TitleParagraph>}
+        title={<Top.TitleParagraph size={22}>{t.appTitle}</Top.TitleParagraph>}
         subtitleBottom={
-          <Top.SubtitleParagraph size={15}>불러오는 중...</Top.SubtitleParagraph>
+          <Top.SubtitleParagraph size={15}>{t.loading}</Top.SubtitleParagraph>
         }
       />
     );
@@ -120,16 +129,16 @@ export function HomePage({
     return (
       <>
         <Top
-          title={<Top.TitleParagraph size={22}>말달리자</Top.TitleParagraph>}
+          title={<Top.TitleParagraph size={22}>{t.appTitle}</Top.TitleParagraph>}
           subtitleBottom={
             <Top.SubtitleParagraph size={15}>
-              {loadError ?? "게임 정보를 불러오지 못했어요."}
+              {loadError ? translateServerMessage(loadError, lang) : t.loadFailed}
             </Top.SubtitleParagraph>
           }
         />
         <div style={{ padding: "0 20px", display: "grid", gap: 10 }}>
           <Button display="block" size="xlarge" onClick={refresh}>
-            다시 시도
+            {t.retry}
           </Button>
           {isPlayStore ? (
             <Button
@@ -142,7 +151,7 @@ export function HomePage({
                 demoLogin();
               }}
             >
-              다시 불러오기
+              {t.reload}
             </Button>
           ) : (
             <Button
@@ -152,7 +161,7 @@ export function HomePage({
               variant="weak"
               onClick={logout}
             >
-              로그아웃
+              {t.menuLogout}
             </Button>
           )}
         </div>
@@ -164,22 +173,20 @@ export function HomePage({
     return (
       <>
         <Top
-          title={<Top.TitleParagraph size={22}>말달리자</Top.TitleParagraph>}
+          title={<Top.TitleParagraph size={22}>{t.appTitle}</Top.TitleParagraph>}
           subtitleBottom={
-            <Top.SubtitleParagraph size={15}>
-              매일 경주 · 찌라시 · 예상
-            </Top.SubtitleParagraph>
+            <Top.SubtitleParagraph size={15}>{t.homeSubtitle}</Top.SubtitleParagraph>
           }
         />
         <div style={{ padding: "0 20px", display: "grid", gap: 10 }}>
           {isPlayStore ? (
             // 자동 진입 중 — 실패했을 때만 수동 재시도 버튼이 의미를 갖는다.
             <Button display="block" size="xlarge" onClick={demoLogin}>
-              {autoDemoTried.current ? "다시 시도" : "불러오는 중..."}
+              {autoDemoTried.current ? t.retry : t.loading}
             </Button>
           ) : (
             <Button display="block" size="xlarge" onClick={login}>
-              토스로 시작하기
+              {t.loginToss}
             </Button>
           )}
         </div>
@@ -196,9 +203,9 @@ export function HomePage({
   return (
     <>
       <Top
-        title={<Top.TitleParagraph size={22}>말달리자</Top.TitleParagraph>}
+        title={<Top.TitleParagraph size={22}>{t.appTitle}</Top.TitleParagraph>}
         subtitleBottom={
-          <Top.SubtitleParagraph size={15}>친구와 맞추기를 메인으로 즐겨보세요</Top.SubtitleParagraph>
+          <Top.SubtitleParagraph size={15}>{t.homeSubtitle}</Top.SubtitleParagraph>
         }
         right={
           <Badge size="small" color="blue" variant="weak">
@@ -218,9 +225,9 @@ export function HomePage({
           }}
         >
           <div style={{ marginBottom: 14 }}>
-            <div style={{ fontSize: 18, fontWeight: 800 }}>친구와 맞추기 · 메인 모드</div>
+            <div style={{ fontSize: 18, fontWeight: 800 }}>{t.partyCardTitle}</div>
             <div style={{ fontSize: 13, opacity: 0.8, marginTop: 4 }}>
-              방 만들기 · 코드 입장 · 말 중복 선택 불가
+              {t.partyCardDesc}
             </div>
           </div>
 
@@ -230,7 +237,7 @@ export function HomePage({
             onClick={onOpenParty}
             style={{ marginBottom: 8 }}
           >
-            친구와 맞추기 시작
+            {t.partyStart}
           </Button>
 
           <div
@@ -241,17 +248,21 @@ export function HomePage({
               marginBottom: 12,
             }}
           >
-            <StatPill label="찌라시 P" value={`${s.predictionPoints}`} />
+            <StatPill label={t.statTipPoints} value={`${s.predictionPoints}`} />
             <StatPill
-              label="경주 티켓"
+              label={t.statTickets}
               value={`${s.rankedTicketsLeft}`}
             />
           </div>
 
           <div className="race-daily-progress">
             <div style={{ fontSize: 12, opacity: 0.85 }}>
-              오늘의 챌린지 · {s.rankedRacesToday ?? 0}/{s.dailyRaceGoal ?? 5}경주
-              {s.dailyChallengeClaimed ? " ✓ 완료" : ` · +${s.dailyChallengeGold ?? 80}G`}
+              {t.dailyChallenge(
+                s.rankedRacesToday ?? 0,
+                s.dailyRaceGoal ?? 5,
+                s.dailyChallengeGold ?? 80,
+                s.dailyChallengeClaimed,
+              )}
             </div>
             <div className="race-daily-progress__bar">
               <div
@@ -272,8 +283,10 @@ export function HomePage({
               style={{ marginBottom: 8 }}
             >
               {ticketAd?.eligible
-                ? `광고 보고 경주 티켓 +1 (오늘 ${ticketAd.remaining.daily}회)`
-                : ticketAd?.reason ?? "티켓 광고 대기 중"}
+                ? t.ticketAdGet(ticketAd.remaining.daily)
+                : ticketAd?.reason
+                  ? translateServerMessage(ticketAd.reason, lang)
+                  : t.ticketAdWait}
             </Button>
           ) : (
             <Button
@@ -282,13 +295,13 @@ export function HomePage({
               onClick={handleRace}
               style={{ marginBottom: 8 }}
             >
-              솔로 경주 시작
+              {t.soloStart}
             </Button>
           )}
 
           {!canRace && s.rankedMessage && (
             <p style={{ fontSize: 12, textAlign: "center", opacity: 0.8, margin: "0 0 8px" }}>
-              {s.rankedMessage}
+              {translateServerMessage(s.rankedMessage, lang)}
             </p>
           )}
 
@@ -305,8 +318,10 @@ export function HomePage({
                 onClick={() => watchAd("AD_RANK_TICKET", "경주 티켓 획득")}
               >
                 {ticketAd.eligible
-                  ? `광고로 티켓 미리 받기 +1 (오늘 ${ticketAd.remaining.daily}회)`
-                  : ticketAd.reason ?? "잠시 후 다시 받을 수 있어요"}
+                  ? t.ticketAdPre(ticketAd.remaining.daily)
+                  : ticketAd.reason
+                    ? translateServerMessage(ticketAd.reason, lang)
+                    : t.ticketAdWait}
               </Button>
             )}
             {(lowPoints || !canRace) && (
@@ -319,8 +334,10 @@ export function HomePage({
                 onClick={() => watchAd("AD_PREDICTION_POINTS", "찌라시 P 획득")}
               >
                 {ptsAd?.eligible
-                  ? `광고 보고 찌라시 P +4 (오늘 ${ptsAd.remaining.daily}회)`
-                  : ptsAd?.reason ?? "찌라시 P 광고"}
+                  ? t.pointsAd(ptsAd.remaining.daily)
+                  : ptsAd?.reason
+                    ? translateServerMessage(ptsAd.reason, lang)
+                    : t.pointsAdLabel}
               </Button>
             )}
           </div>
@@ -334,9 +351,9 @@ export function HomePage({
           contents={
             <ListRow.Texts
               type="2RowTypeA"
-              top="친구와 맞추기"
+              top={t.menuParty}
               topProps={{ color: colors.grey800, fontWeight: "bold" }}
-              bottom="말 이름 응원 · 찌라시 3장 · 누적 점수"
+              bottom={t.menuPartyDesc}
               bottomProps={{ color: colors.blue500 }}
             />
           }
@@ -348,9 +365,9 @@ export function HomePage({
           contents={
             <ListRow.Texts
               type="2RowTypeA"
-              top="출석 보상"
+              top={t.menuAttendance}
               topProps={{ color: colors.grey800, fontWeight: "bold" }}
-              bottom={`스트릭 ${s.streak}일 · 골드 ${s.gold}G`}
+              bottom={t.menuAttendanceDesc(s.streak)}
               bottomProps={{ color: colors.grey600 }}
             />
           }
@@ -361,17 +378,17 @@ export function HomePage({
       <div style={{ padding: "8px 20px", display: "flex", flexWrap: "wrap", gap: 12 }}>
         {showDevAdsLink() && (
           <TextButton size="medium" color={colors.grey600} onClick={onOpenAds}>
-            광고 테스트
+            {t.adTest}
           </TextButton>
         )}
         <TextButton size="medium" color={colors.grey600} onClick={onOpenHelp}>
-          도움말
+          {t.menuHelp}
         </TextButton>
         <TextButton size="medium" color={colors.grey500} onClick={onOpenSettings}>
-          설정
+          {t.menuSettings}
         </TextButton>
         <TextButton size="medium" color={colors.grey500} onClick={logout}>
-          로그아웃
+          {t.menuLogout}
         </TextButton>
       </div>
     </>

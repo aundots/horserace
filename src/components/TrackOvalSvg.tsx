@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { useT } from "../i18n/LangContext";
 import { TrackScenery } from "./TrackScenery";
 import {
   chuteLengthPx,
@@ -77,6 +78,8 @@ type TrackOvalSvgProps = {
 
 export function TrackOvalSvg({ layout, track, compact = false, raceDistance }: TrackOvalSvgProps) {
   const uid = useId().replace(/:/g, "");
+  // 이 파일의 `t` 는 트랙 색 스타일이라, 문자열 카탈로그는 다른 이름으로 받는다.
+  const str = useT();
   const t = TRACK_STYLES[track] ?? TRACK_STYLES.DRY;
   const { width, height, worldWidth, worldHeight, offsetX, offsetY, cx, cy, straightHalf, cornerRadius, laneWidth, chuteLength } =
     layout;
@@ -193,7 +196,7 @@ export function TrackOvalSvg({ layout, track, compact = false, raceDistance }: T
             fontWeight={700}
             letterSpacing="0.06em"
           >
-            HOME · 오르막
+            {str.trackHome}
           </text>
           <text
             x={cx}
@@ -204,7 +207,7 @@ export function TrackOvalSvg({ layout, track, compact = false, raceDistance }: T
             fontWeight={600}
             letterSpacing="0.06em"
           >
-            BACK · 내리막
+            {str.trackBack}
           </text>
           <text
             x={cx + straightHalf + chutePx * 0.55}

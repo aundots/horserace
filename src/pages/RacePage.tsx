@@ -7,6 +7,8 @@ import { RaceCommentaryBar } from "../components/RaceCommentaryBar";
 import { RaceHorseIcon } from "../components/RaceHorseIcon";
 import { RaceTrackScene } from "../components/RaceTrackScene";
 import { WhipTapButton } from "../components/WhipTapButton";
+import { useLang } from "../i18n/LangContext";
+import { trackLabel, weatherLabel } from "../i18n/labels";
 import { useRaceCommentary } from "../hooks/useRaceCommentary";
 import { useRacePlayback } from "../hooks/useRacePlayback";
 import { useWhipTap } from "../hooks/useWhipTap";
@@ -31,18 +33,6 @@ import {
 } from "../lib/raceSound";
 import type { AdPlacement, PartyMemberResult, RaceResult } from "../types/game";
 
-const TRACK_LABEL: Record<string, string> = {
-  DRY: "마른 주로",
-  WET: "습윤 주로",
-  HEAVY: "무거운 주로",
-};
-
-const WEATHER_LABEL: Record<string, string> = {
-  SUNNY: "맑음",
-  CLOUDY: "흐림",
-  RAIN: "비",
-};
-
 interface RacePageProps {
   result: RaceResult;
   rankedAvailable: boolean;
@@ -66,6 +56,7 @@ export function RacePage({
   onDone,
   partyResults = null,
 }: RacePageProps) {
+  const { lang, t } = useLang();
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
   const [continuing, setContinuing] = useState(false);
@@ -179,7 +170,7 @@ export function RacePage({
         return {
           rank: i + 1,
           number: h.number,
-          name: ent?.name ?? `${h.number}번`,
+          name: ent?.name ?? t.horseNo(h.number),
           silkHue: ent?.silkHue,
           isPlayer: h.number === pickedNumber,
         };
@@ -229,6 +220,7 @@ export function RacePage({
   }, [result.mode, partyResults, pickedNumber, entrantMap]);
 
   const commentary = useRaceCommentary({
+    lang,
     raceProgress,
     started,
     finished,
@@ -247,33 +239,37 @@ export function RacePage({
   });
 
   const statusLabel = !started
-    ? "출발 대기"
+    ? t.raceWaiting
     : showOvertake
-      ? "역전!"
+      ? t.raceOvertake
       : finished
-        ? "완주"
-        : "LIVE";
+        ? t.raceFinished
+        : t.raceLive;
 
   const headline = !started
-    ? "출발 준비"
+    ? t.raceReady
     : finished
       ? result.dnf
         ? result.dnfReason === "interference"
           ? pickedEntrant
-            ? `예상 ${pickedEntrant.number}번 · 간섭 사고 기권`
-            : "간섭 사고 기권"
+            ? t.dnfInterference(pickedEntrant.number)
+            : t.dnfInterferencePlain
           : pickedEntrant
-            ? `예상 ${pickedEntrant.number}번 낙마`
-            : "낙마 처리"
+            ? t.dnfFall(pickedEntrant.number)
+            : t.dnfFallPlain
         : pickedEntrant
           ? result.mode === "party"
-            ? `내 ${pickedEntrant.number}번 · ${result.myPlace}착 · +${result.raceScore ?? 0}점`
-            : `예상 ${pickedEntrant.name} · ${result.myPlace}위`
-          : `${result.myPlace}위 완주`
-      : "경주 진행 중";
+            ? t.partyFinish(
+                pickedEntrant.number,
+                result.myPlace,
+                result.raceScore ?? 0,
+              )
+            : t.soloFinish(pickedEntrant.name, result.myPlace)
+          : t.plainFinish(result.myPlace)
+      : t.raceInProgress;
 
   const subline = !started
-    ? "8두가 결승선 앞에 대기 중입니다"
+    ? t.raceWaitingDesc
     : finished
       ? commentary.text || result.feedback
       : commentary.text;
@@ -285,21 +281,20 @@ export function RacePage({
           <div className="race-page__title">
             {result.mode === "party"
               ? result.partyRaceNumber
-                ? `친구 내기 · ${result.partyRaceNumber}경기`
-                : "친구 내기"
+                ? t.modePartyRace(result.partyRaceNumber)
+                : t.modeParty
               : result.mode === "practice"
-                ? "연습주행"
-                : "랭킹 경주"}
+                ? t.modePractice
+                : t.modeRanked}
           </div>
           <div className="race-page__meta">
-            {result.condition.distance}m ·{" "}
-            {TRACK_LABEL[result.condition.track] ?? result.condition.track} ·{" "}
-            {WEATHER_LABEL[result.condition.weather] ?? result.condition.weather}
+            {result.condition.distance}m · {trackLabel(t, result.condition.track)} ·{" "}
+            {weatherLabel(t, result.condition.weather)}
           </div>
         </div>
         {pickedEntrant && (
           <div className="race-page__pick">
-            <span className="race-page__pick-label">내 말</span>
+            <span className="race-page__pick-label">{t.myHorse}</span>
             <span className="race-page__pick-num">{pickedEntrant.number}</span>
             <span className="race-page__pick-name">{pickedEntrant.name}</span>
           </div>
@@ -331,7 +326,7 @@ export function RacePage({
                 {statusLabel}
               </span>
               {started && (
-                <span className="race-hud__stat">역전 {result.overtakes}회</span>
+                <span className="race-hud__stat">{t.overtakeCount(result.overtakes)}</span>
               )}
             </div>
             <div className="race-hud__board-row">
@@ -413,8 +408,7 @@ export function RacePage({
         {finished && partyResults && partyResults.length > 0 && (
           <div className="race-panel__party">
             <div className="race-panel__headline" style={{ marginBottom: 8 }}>
-              {result.partyRaceNumber ? `${result.partyRaceNumber}경기 · ` : ""}
-              친구 점수
+              {t.partyResultHeader(result.partyRaceNumber)}
             </div>
             {[...partyResults]
               .sort((a, b) => b.totalScore - a.totalScore)
@@ -422,20 +416,22 @@ export function RacePage({
               <div key={m.userKey} className="race-panel__party-row">
                 <span>{m.displayName}</span>
                 <span>
-                  {m.pick != null ? `${m.pick}번 · ${m.place}착 +${m.racePoints}` : "—"}
-                  {" · "}누적 {m.totalScore}점
+                  {m.pick != null
+                    ? t.memberResult(m.pick, m.place, m.racePoints)
+                    : "—"}
+                  {t.memberTotal(m.totalScore)}
                 </span>
               </div>
             ))}
             <p className="race-panel__muted" style={{ marginTop: 8 }}>
-              1착 10 · 2착 8 · 3착 5 · 4착 3 · 5착 2 · 6착 1 · 7·8착 0
+              {t.scoreTable}
             </p>
           </div>
         )}
 
         {finished && result.mode !== "party" && (
           <div className="race-panel__results">
-            <div className="race-panel__reward">+{result.goldEarned} 골드</div>
+            <div className="race-panel__reward">{t.goldEarned(result.goldEarned)}</div>
             {result.prediction && (
               <div
                 className={
@@ -444,38 +440,48 @@ export function RacePage({
                     : "race-panel__tag"
                 }
               >
-                예상{" "}
                 {result.prediction.hit === "win"
-                  ? "1착 적중!"
+                  ? t.predictWin
                   : result.prediction.hit === "place"
-                    ? "2착 (1착 미적중)"
-                    : "미적중"}
+                    ? t.predictPlace
+                    : t.predictMiss}
               </div>
             )}
             {result.photoFinish && (
               <div className="race-panel__tag race-panel__tag--accent">
-                포토 피니시
+                {t.photoFinish}
               </div>
             )}
             {result.fairnessTag && (
-              <div className="race-panel__muted">{result.fairnessTag}</div>
+              <div className="race-panel__muted">
+                {result.fairnessTag === "간섭 사고"
+                  ? t.tagInterference
+                  : result.fairnessTag === "낙마"
+                    ? t.tagFall
+                    : result.fairnessTag}
+              </div>
             )}
             {result.loopBonus && (
               <div className="race-panel__loop">
                 {result.loopBonus.streakBonus && (
                   <div className="race-panel__tag race-panel__tag--accent">
-                    연속 {result.loopBonus.sessionRaceStreak}경주! 찌라시 무료 +1
+                    {t.streakBonus(result.loopBonus.sessionRaceStreak)}
                   </div>
                 )}
                 {result.loopBonus.dailyChallengeComplete && (
                   <div className="race-panel__tag race-panel__tag--accent">
-                    오늘 {result.loopBonus.dailyRaceGoal}경주 달성! +
-                    {result.loopBonus.dailyChallengeGold}G
+                    {t.dailyDoneShort(
+                      result.loopBonus.dailyRaceGoal,
+                      result.loopBonus.dailyChallengeGold,
+                    )}
                   </div>
                 )}
                 <div className="race-panel__muted">
-                  연속 출전 {result.loopBonus.sessionRaceStreak} · 오늘{" "}
-                  {result.loopBonus.rankedRacesToday}/{result.loopBonus.dailyRaceGoal}경주
+                  {t.loopStatus(
+                    result.loopBonus.sessionRaceStreak,
+                    result.loopBonus.rankedRacesToday,
+                    result.loopBonus.dailyRaceGoal,
+                  )}
                 </div>
               </div>
             )}
@@ -493,7 +499,7 @@ export function RacePage({
           }}
           style={{ marginBottom: 12 }}
         >
-          경주 시작
+          {t.raceStart}
         </Button>
       )}
 
@@ -514,8 +520,8 @@ export function RacePage({
               }}
             >
               {continuing
-                ? "다음 경주 준비 중..."
-                : `광고 보고 티켓 +1 · 바로 다음 경주 (오늘 ${ticketAd.remaining.daily}회)`}
+                ? t.nextRacePreparing
+                : t.ticketAdNext(ticketAd.remaining.daily)}
             </Button>
           ) : (
             <Button
@@ -533,9 +539,9 @@ export function RacePage({
             >
               {rankedAvailable
                 ? continuing
-                  ? "다음 경주 준비 중..."
-                  : "바로 다음 경주"
-                : "티켓 없음 · 광고 시청 필요"}
+                  ? t.nextRacePreparing
+                  : t.nextRace
+                : t.noTicket}
             </Button>
           )}
           {rankedAvailable && continueAd?.eligible && (
@@ -554,7 +560,7 @@ export function RacePage({
                 }
               }}
             >
-              광고 보고 찌라시 P+4 · 다음 경주 (오늘 {continueAd.remaining.daily}회)
+              {t.pointsAdNext(continueAd.remaining.daily)}
             </Button>
           )}
           {!rankedAvailable && !ticketAd?.eligible && ticketAd?.reason && (
@@ -570,14 +576,14 @@ export function RacePage({
             disabled={continuing}
             onClick={() => onDone()}
           >
-            홈으로 (연속 출전 종료)
+            {t.homeEndStreak}
           </Button>
         </div>
       )}
 
       {finished && result.mode === "party" && (
         <Button display="block" size="xlarge" onClick={() => onDone()}>
-          방으로 돌아가기
+          {t.backToRoom}
         </Button>
       )}
     </div>

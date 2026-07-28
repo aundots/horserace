@@ -1,4 +1,5 @@
 import { silkColorFromHue, silkHueForNumber } from "../lib/horseSilk";
+import { useT } from "../i18n/LangContext";
 
 export type LiveLeader = {
   rank: number;
@@ -16,11 +17,12 @@ type RaceLiveScoreboardProps = {
 const RANK_LABEL = ["1st", "2nd", "3rd"] as const;
 
 export function RaceLiveScoreboard({ leaders, visible }: RaceLiveScoreboardProps) {
+  const t = useT();
   if (!visible || leaders.length === 0) return null;
 
   return (
-    <div className="race-scoreboard" aria-label="공식 순위 전광판">
-      <div className="race-scoreboard__header">공식 순위</div>
+    <div className="race-scoreboard" aria-label={t.officialRanks}>
+      <div className="race-scoreboard__header">{t.officialRanks}</div>
       <ol className="race-scoreboard__list">
         {leaders.map((leader) => {
           const hue = leader.silkHue ?? silkHueForNumber(leader.number);

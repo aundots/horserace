@@ -2,14 +2,11 @@ import { colors } from "@toss/tds-colors";
 import { Button, List, ListRow, TextField, Top, useToast } from "@toss/tds-mobile";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { EntrantPickCard } from "../components/EntrantPickCard";
+import { useLang } from "../i18n/LangContext";
+import { trackLabel } from "../i18n/labels";
+import { translateServerMessage } from "../i18n/serverMessages";
 import { formatScoreRules } from "../lib/partyScoring";
 import type { PartySnapshot } from "../types/game";
-
-const TRACK_LABEL: Record<string, string> = {
-  DRY: "마른 주로",
-  WET: "습윤 주로",
-  HEAVY: "무거운 주로",
-};
 
 interface PartyPageProps {
   party: PartySnapshot | null;
@@ -26,7 +23,7 @@ interface PartyPageProps {
   onBack: () => void;
 }
 
-function Scoreboard({ party }: { party: PartySnapshot }) {
+function Scoreboard({ party, t }: { party: PartySnapshot; t: ReturnType<typeof useLang>["t"] }) {
   const ranked = useMemo(
     () => [...party.members].sort((a, b) => b.totalScore - a.totalScore),
     [party.members],
@@ -38,14 +35,13 @@ function Scoreboard({ party }: { party: PartySnapshot }) {
   return (
     <div className="party-scoreboard">
       <div className="party-scoreboard__title">
-        누적 점수 · {party.raceNumber > 0 ? `${party.raceNumber}경기` : "대기"}
+        {t.scoreTitle(party.raceNumber)}
       </div>
-      <p className="party-scoreboard__hint">{formatScoreRules()} · 누적 낮을수록 내기 불리</p>
+      <p className="party-scoreboard__hint">{t.scoreTable} · {t.scoreHint}</p>
       {ranked.map((m, i) => (
         <div key={m.userKey} className="party-scoreboard__row">
           <span>
-            {i + 1}위 {m.displayName}
-            {m.isYou ? " (나)" : ""}
+            {t.rankLine(i + 1, m.displayName, m.isYou)}
           </span>
           <span
             style={{
@@ -56,8 +52,7 @@ function Scoreboard({ party }: { party: PartySnapshot }) {
                   : colors.grey900,
             }}
           >
-            {m.totalScore}점
-            {m.totalScore === minScore && ranked.length > 1 ? " · 꼴찌" : ""}
+            {t.scoreWithLast(m.totalScore, m.totalScore === minScore && ranked.length > 1)}
           </span>
         </div>
       ))}
@@ -80,6 +75,7 @@ export function PartyPage({
   onBack,
 }: PartyPageProps) {
   const toast = useToast();
+  const { lang, t } = useLang();
   const [party, setParty] = useState<PartySnapshot | null>(initialParty);
   const [joinCode, setJoinCode] = useState(initialJoinCode ?? "");
   const [nick, setNick] = useState("");
@@ -145,7 +141,10 @@ export function PartyPage({
       setParty(next);
       if (okMsg) toast.openToast(okMsg, { type: "success" });
     } catch (error) {
-      toast.openToast(error instanceof Error ? error.message : "실패", { type: "bottom" });
+      toast.openToast(
+        translateServerMessage(error instanceof Error ? error.message : "실패", lang),
+        { type: "bottom" },
+      );
     } finally {
       setBusy(false);
     }
@@ -160,13 +159,13 @@ export function PartyPage({
     const inviteUrl = `${base}/?party=${party!.code}`;
     try {
       await navigator.clipboard.writeText(inviteUrl);
-      toast.openToast("초대 링크를 복사했어요", { type: "success" });
+      toast.openToast(t.inviteCopied, { type: "success" });
     } catch {
       try {
         await navigator.clipboard.writeText(party!.code);
-        toast.openToast(`코드: ${party!.code}`, { type: "bottom" });
+        toast.openToast(t.codeIs(party!.code), { type: "bottom" });
       } catch {
-        toast.openToast(`코드: ${party!.code}`, { type: "bottom" });
+        toast.openToast(t.codeIs(party!.code), { type: "bottom" });
       }
     }
   }
@@ -177,18 +176,18 @@ export function PartyPage({
     return (
       <>
         <Top
-          title={<Top.TitleParagraph size={22}>친구와 맞추기</Top.TitleParagraph>}
+          title={<Top.TitleParagraph size={22}>{t.partyTitle}</Top.TitleParagraph>}
           subtitleBottom={
             <Top.SubtitleParagraph size={15}>
-              내기용 · 스탯 숨김 · 찌라시 3장 · 누적 점수
+              {t.partyIntro}
             </Top.SubtitleParagraph>
           }
         />
         <div style={{ padding: "0 20px", display: "grid", gap: 12 }}>
           <TextField
             variant="box"
-            label="닉네임 (입장 시 필수)"
-            placeholder="닉네임 입력 · 코드로 입장하려면 필요해요"
+            label={t.nickname}
+            placeholder={t.nicknamePlaceholder}
             value={nick}
             onChange={(e) => setNick(e.target.value)}
           />
@@ -196,14 +195,14 @@ export function PartyPage({
             display="block"
             size="xlarge"
             disabled={busy}
-            onClick={() => act(() => onCreate(nick || undefined), "방이 만들어졌어요")}
+            onClick={() => act(() => onCreate(nick || undefined), t.roomCreated)}
           >
-            방 만들기
+            {t.createRoom}
           </Button>
           <TextField
             variant="box"
-            label="방 코드"
-            placeholder="6자리 코드"
+            label={t.roomCode}
+            placeholder={t.roomCodePlaceholder}
             value={joinCode}
             onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
           />
@@ -213,17 +212,17 @@ export function PartyPage({
             color="dark"
             variant="weak"
             disabled={busy || !canJoin}
-            onClick={() => act(() => onJoin(joinCode, trimmedNick), "입장했어요")}
+            onClick={() => act(() => onJoin(joinCode, trimmedNick), t.joined)}
           >
-            코드로 입장
+            {t.joinByCode}
           </Button>
           {joinCode.length >= 4 && trimmedNick.length === 0 && (
             <p style={{ fontSize: 13, color: colors.grey600, margin: 0, textAlign: "center" }}>
-              입장하려면 닉네임을 입력해 주세요
+              {t.nicknameRequired}
             </p>
           )}
           <Button display="block" size="medium" color="dark" variant="weak" onClick={onBack}>
-            돌아가기
+            {t.back}
           </Button>
         </div>
       </>
@@ -242,19 +241,19 @@ export function PartyPage({
   return (
     <>
       <Top
-        title={<Top.TitleParagraph size={22}>방 {party.code}</Top.TitleParagraph>}
+        title={<Top.TitleParagraph size={22}>{t.partyRoom(party.code)}</Top.TitleParagraph>}
         subtitleBottom={
           <Top.SubtitleParagraph size={15}>
-            {party.status === "waiting" && "친구 초대 · 같은 말 중복 불가"}
+            {party.status === "waiting" && t.partySubtitleWaiting}
             {party.status === "picking" &&
-              `${party.raceNumber}경기 · 말 선택 · 찌라시 ${party.tipsRemaining}장 남음`}
-            {party.status === "racing" && "경주 진행 중..."}
-            {party.status === "done" && `${party.raceNumber}경기 결과`}
+              t.partySubtitlePicking(party.raceNumber, party.tipsRemaining)}
+            {party.status === "racing" && t.partySubtitleRacing}
+            {party.status === "done" && t.partySubtitleDone(party.raceNumber)}
           </Top.SubtitleParagraph>
         }
       />
 
-      <Scoreboard party={party} />
+      <Scoreboard party={party} t={t} />
 
       <List>
         {party.members.map((m) => (
@@ -263,27 +262,27 @@ export function PartyPage({
             contents={
               <ListRow.Texts
                 type="2RowTypeA"
-                top={`${m.displayName}${m.isYou ? " (나)" : ""}${party.hostUserKey === m.userKey ? " · 방장" : ""}`}
+                top={`${m.displayName}${m.isYou ? ` (${t.you})` : ""}${party.hostUserKey === m.userKey ? ` · ${t.host}` : ""}`}
                 topProps={{ fontWeight: "bold", color: colors.grey900 }}
                 bottom={
                   party.status === "picking"
                     ? m.isYou
                       ? m.prediction != null
-                        ? `내 말 ${m.prediction}번`
-                        : "말 선택 대기"
+                        ? t.myPick(m.prediction)
+                        : t.pickWaiting
                       : m.pickConfirmed
-                        ? "선택 완료 ✓"
-                        : "선택 중..."
+                        ? t.pickDone
+                        : t.picking
                     : party.status === "done" && party.clientResult
                       ? (() => {
                           const r = party.clientResult!.memberResults.find(
                             (x) => x.userKey === m.userKey,
                           );
                           return r?.pick != null
-                            ? `${r.pick}번 · ${r.place}착 +${r.racePoints}점 (누적 ${r.totalScore})`
-                            : `${m.totalScore}점`;
+                            ? t.memberPickInfo(r.pick, r.place, r.racePoints, r.totalScore)
+                            : t.points(m.totalScore);
                         })()
-                      : `${m.totalScore}점`
+                      : t.points(m.totalScore)
                 }
                 bottomProps={{
                   color:
@@ -298,25 +297,24 @@ export function PartyPage({
       {party.status === "waiting" && (
         <div style={{ padding: "12px 20px", display: "grid", gap: 10 }}>
           <p style={{ fontSize: 13, color: colors.grey600, margin: 0, lineHeight: 1.5 }}>
-            스탯·기수는 숨기고 <strong>말 이름</strong>은 공개! 경기마다 찌라시{" "}
-            <strong>3장</strong> · 같은 말 중복 불가 · {formatScoreRules()}
+            {t.partyIntroLong}
           </p>
           <Button display="block" size="large" color="dark" variant="weak" onClick={copyCode}>
-            초대 링크 복사 · 친구에게 공유
+            {t.copyInvite}
           </Button>
           {party.isHost && (
             <Button
               display="block"
               size="xlarge"
               disabled={busy || party.members.length < 1}
-              onClick={() => act(onPrepare, "1경기 준비 완료")}
+              onClick={() => act(onPrepare, t.prepareDone)}
             >
-              {party.raceNumber > 0 ? "다음 경기 준비" : "1경기 시작 · 말 선택"}
+              {party.raceNumber > 0 ? t.hostPrepareNext : t.hostPrepare}
             </Button>
           )}
           {!party.isHost && (
             <p style={{ textAlign: "center", color: colors.grey500, fontSize: 13 }}>
-              방장이 경주를 준비할 때까지 기다려 주세요
+              {t.waitForHost}
             </p>
           )}
         </div>
@@ -326,11 +324,14 @@ export function PartyPage({
         <>
           <div style={{ padding: "4px 16px 0" }}>
             <p style={{ fontWeight: 800, fontSize: 15, margin: "0 0 4px" }}>
-              {party.raceNumber}경기 · {party.condition?.distance}m ·{" "}
-              {TRACK_LABEL[party.condition?.track ?? ""] ?? party.condition?.track}
+              {t.partyRaceInfo(
+                party.raceNumber,
+                party.condition?.distance ?? 0,
+                trackLabel(t, party.condition?.track ?? ""),
+              )}
             </p>
             <p style={{ fontSize: 12, color: colors.grey600, margin: "0 0 10px" }}>
-              매 경기 <strong>말 새로 선택</strong> · 이름 공개 · 찌라시 {party.tipsRemaining}장
+              {t.everyRacePick(party.tipsRemaining)}
             </p>
             {sortedEntrants.map((e) => (
               <EntrantPickCard
@@ -355,7 +356,10 @@ export function PartyPage({
                     setParty(next);
                   } catch (error) {
                     toast.openToast(
-                      error instanceof Error ? error.message : "찌라시 열기 실패",
+                      translateServerMessage(
+                        error instanceof Error ? error.message : "찌라시 열기 실패",
+                        lang,
+                      ),
                       { type: "bottom" },
                     );
                   } finally {
@@ -372,23 +376,23 @@ export function PartyPage({
               disabled={busy || selectingPick == null}
               onClick={() =>
                 selectingPick != null &&
-                act(() => onPredict(selectingPick), `${selectingPick}번 선택 완료`)
+                act(() => onPredict(selectingPick), t.pickedRaceStart(selectingPick))
               }
             >
               {confirmedPick != null
-                ? `내 말 ${confirmedPick}번 확정 · 바꾸려면 다시 선택`
+                ? t.pickConfirmed(confirmedPick)
                 : selectingPick != null
-                  ? `${selectingPick}번 선택 확정`
-                  : "이번 경기 말을 선택하세요"}
+                  ? t.confirmPick(selectingPick)
+                  : t.selectHorse}
             </Button>
             {party.isHost && (
               <Button
                 display="block"
                 size="large"
                 disabled={busy || !allPicked}
-                onClick={() => act(onRun, "경주 시작!")}
+                onClick={() => act(onRun, t.raceStarted)}
               >
-                {allPicked ? "모두 선택 완료 · 경주 시작" : "아직 선택 안 한 친구가 있어요"}
+                {allPicked ? t.allPicked : t.notAllPicked}
               </Button>
             )}
           </div>
@@ -398,16 +402,16 @@ export function PartyPage({
       {party.status === "done" && party.clientResult && (
         <div style={{ padding: "12px 20px", display: "grid", gap: 10 }}>
           <p style={{ fontWeight: 800, fontSize: 15, margin: 0 }}>
-            {party.clientResult.raceNumber}경기 결과
+            {t.raceResult(party.clientResult.raceNumber)}
           </p>
           {party.clientResult.memberResults.map((m) => (
             <div key={m.userKey} className="party-scoreboard__row">
               <span>{m.displayName}</span>
               <span style={{ fontWeight: 700, textAlign: "right" }}>
-                {m.pick != null ? `${m.pick}번 · ${m.place}착` : "—"}
+                {m.pick != null ? t.memberResultRow(m.pick, m.place) : "—"}
                 <br />
                 <span style={{ fontSize: 12, color: colors.blue500 }}>
-                  +{m.racePoints}점 · 누적 {m.totalScore}점
+                  {t.memberPointsRow(m.racePoints, m.totalScore)}
                 </span>
               </span>
             </div>
@@ -416,7 +420,7 @@ export function PartyPage({
             {formatScoreRules()}
           </p>
           <Button display="block" size="xlarge" onClick={() => onRaceReady(party)}>
-            경주 다시 보기
+            {t.replayRace}
           </Button>
           {party.isHost && (
             <Button
@@ -425,15 +429,15 @@ export function PartyPage({
               disabled={busy}
               onClick={() => {
                 setPick(null);
-                act(onPrepare, `${party.raceNumber + 1}경기 준비`);
+                act(onPrepare, t.nextRacePrep(party.raceNumber + 1));
               }}
             >
-              다음 경기 · {party.raceNumber + 1}경기
+              {t.nextGame(party.raceNumber + 1)}
             </Button>
           )}
           {!party.isHost && (
             <p style={{ textAlign: "center", color: colors.grey500, fontSize: 13, margin: 0 }}>
-              방장이 다음 경기를 준비할 때까지 기다려 주세요
+              {t.waitForHostNext}
             </p>
           )}
         </div>
@@ -452,7 +456,7 @@ export function PartyPage({
             onBack();
           }}
         >
-          방 나가기
+          {t.leaveRoom}
         </Button>
       </div>
     </>

@@ -7,6 +7,7 @@ import {
   checkPokedexUnlocks,
   isNewbieShield,
   streakGoldReward,
+  streakPointsReward,
   updateStreak,
 } from "../lib/retention.js";
 import type { Condition, DistanceApt, PaceType, TrackState } from "../lib/raceSim.js";
@@ -261,6 +262,7 @@ export function syncPlayerSession(player: PlayerState) {
     player.lastStreakDate = today;
     player.weeklyPass.loginDays += 1;
     addGold(player, streakGoldReward(player.streak));
+    addPredictionPoints(player, streakPointsReward(player.streak));
   }
 
   if (lastDay === today) return;
@@ -473,6 +475,7 @@ export function claimAttendance(player: PlayerState) {
   player.attendanceLastClaim = today;
   player.attendanceIndex = Math.min(27, player.attendanceIndex + 1);
   addGold(player, reward.gold);
+  addPredictionPoints(player, reward.points);
   return reward;
 }
 

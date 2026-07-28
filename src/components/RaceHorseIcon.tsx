@@ -8,6 +8,7 @@ import {
   silkHueForNumber,
 } from "../lib/horseSilk";
 import type { HorseCoatId } from "../lib/horseCoat";
+import { useT } from "../i18n/LangContext";
 
 type RaceHorseIconProps = {
   number: number;
@@ -40,6 +41,7 @@ export function RaceHorseIcon({
   compact = false,
   showCheerName = false,
 }: RaceHorseIconProps) {
+  const t = useT();
   const [frame, setFrame] = useState(0);
   const hue = silkHue ?? silkHueForNumber(number);
   const w = size * (compact ? 1.65 : 2.15);
@@ -134,7 +136,7 @@ export function RaceHorseIcon({
         <div className="race-horse-unit__label">
           {name && <span className="race-horse-unit__horse">{name}</span>}
           {jockeyName && (
-            <span className="race-horse-unit__jockey">기수 {jockeyShort}</span>
+            <span className="race-horse-unit__jockey">{t.jockeyShort(jockeyShort)}</span>
           )}
         </div>
       )}

@@ -1,4 +1,5 @@
 import { silkColorFromHue, silkHueForNumber } from "../lib/horseSilk";
+import { useT } from "../i18n/LangContext";
 
 export type PartyPick = {
   userKey: number;
@@ -13,11 +14,12 @@ type RacePartyPicksProps = {
 };
 
 export function RacePartyPicks({ picks, visible }: RacePartyPicksProps) {
+  const t = useT();
   if (!visible || picks.length === 0) return null;
 
   return (
-    <div className="race-party-picks" aria-label="상대방 선택">
-      <div className="race-party-picks__header">상대 선택</div>
+    <div className="race-party-picks" aria-label={t.opponentPicks}>
+      <div className="race-party-picks__header">{t.opponentPicks}</div>
       <ul className="race-party-picks__list">
         {picks.map((p) => {
           const hue = p.silkHue ?? silkHueForNumber(p.number);

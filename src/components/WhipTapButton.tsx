@@ -1,3 +1,4 @@
+import { useT } from "../i18n/LangContext";
 import type { WhipJudgment } from "../lib/whipTap";
 
 type WhipTapButtonProps = {
@@ -8,6 +9,7 @@ type WhipTapButtonProps = {
 };
 
 export function WhipTapButton({ visible, combo, effect, onTap }: WhipTapButtonProps) {
+  const t = useT();
   if (!visible) return null;
 
   return (
@@ -19,7 +21,7 @@ export function WhipTapButton({ visible, combo, effect, onTap }: WhipTapButtonPr
             effect === "great" ? "whip-tap__judge whip-tap__judge--great" : "whip-tap__judge whip-tap__judge--miss"
           }
         >
-          {effect === "great" ? "GREAT!" : "너무 빨라요!"}
+          {effect === "great" ? t.whipGreat : t.whipMiss}
         </span>
       )}
       <button
@@ -31,8 +33,8 @@ export function WhipTapButton({ visible, combo, effect, onTap }: WhipTapButtonPr
         }}
       >
         <span className="whip-tap__icon">🏇</span>
-        <span className="whip-tap__label">채찍질!</span>
-        {combo > 1 && <span className="whip-tap__combo">{combo} 콤보</span>}
+        <span className="whip-tap__label">{t.whipTap}</span>
+        {combo > 1 && <span className="whip-tap__combo">{t.whipCombo(combo)}</span>}
       </button>
     </div>
   );
