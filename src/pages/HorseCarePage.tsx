@@ -1,6 +1,6 @@
 import { colors } from "@toss/tds-colors";
 import { Button, List, ListRow, Top, useToast } from "@toss/tds-mobile";
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { RaceHorseIcon } from "../components/RaceHorseIcon";
 import { COAT_STYLES, HORSE_COAT_IDS } from "../lib/horseCoat";
 import {
@@ -143,10 +143,10 @@ export function HorseCarePage({
       await onAction(action);
       if (action === "train") {
         toast.openToast("스탯 포인트 +1! 아래 배분에서 올릴 수 있어요.", {
-          type: "success",
+          type: "top",
         });
       } else if (action === "feed") {
-        toast.openToast("스탯 포인트 +1! 피로도가 회복됐어요.", { type: "success" });
+        toast.openToast("스탯 포인트 +1! 피로도가 회복됐어요.", { type: "top" });
       }
     } finally {
       setBusy(null);
@@ -158,7 +158,7 @@ export function HorseCarePage({
     setBusy("save");
     try {
       await onCustomize(draft);
-      toast.openToast("말 설정이 저장됐어요.", { type: "success" });
+      toast.openToast("말 설정이 저장됐어요.", { type: "top" });
     } catch (error) {
       toast.openToast(
         error instanceof Error ? error.message : "저장에 실패했어요.",
@@ -176,7 +176,7 @@ export function HorseCarePage({
       const preset = HORSE_PRESETS[presetId];
       await onApplyPreset(presetId, draft.coat);
       setDraft({ ...preset, coat: draft.coat });
-      toast.openToast(`${preset.label} 프리셋을 적용했어요.`, { type: "success" });
+      toast.openToast(`${preset.label} 프리셋을 적용했어요.`, { type: "top" });
     } catch (error) {
       toast.openToast(
         error instanceof Error ? error.message : "프리셋 적용에 실패했어요.",
@@ -439,7 +439,7 @@ export function HorseCarePage({
   );
 }
 
-function SectionTitle({ children }: { children: string }) {
+function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <div
       style={{

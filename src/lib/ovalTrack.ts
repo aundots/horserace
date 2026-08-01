@@ -137,24 +137,6 @@ export function mainLoopMeters(layout: OvalLayout): number {
   return TRACK_LAP_METERS - chuteMeters(layout);
 }
 
-function laneRadius(layout: OvalLayout, lane: number) {
-  const midLane = (HORSE_LANE_COUNT - 1) / 2;
-  return layout.cornerRadius + (lane - midLane) * layout.laneWidth;
-}
-
-function segmentMeters(layout: OvalLayout) {
-  const L = layout.straightHalf;
-  const R = layout.cornerRadius;
-  const totalV = stadiumPerimeter(L, R);
-  const joinFinishV = joinToFinishVirtual(L, R);
-  const scale = TRACK_LAP_METERS / totalV;
-  return {
-    joinFinishM: joinFinishV * scale,
-    lapM: TRACK_LAP_METERS,
-    totalV,
-  };
-}
-
 /** 주로 내·외곽 반경 */
 export function getTrackRadii(layout: OvalLayout) {
   const outerR = layout.cornerRadius + layout.laneWidth * 4;
@@ -211,11 +193,6 @@ function chuteCrossLineAtOnChute(layout: OvalLayout, onChuteM: number): TrackCro
   };
 }
 
-function chuteCrossLine(layout: OvalLayout, metersRemaining: number): TrackCrossLine {
-  const loopM = mainLoopMeters(layout);
-  const onChute = Math.max(0, metersRemaining - loopM);
-  return chuteCrossLineAtOnChute(layout, onChute);
-}
 
 function midR(a: number, b: number) {
   return (a + b) / 2;
@@ -310,13 +287,6 @@ export function racingLateralT(
 /** 직선 2 + 좌·우 반원 — 반시계(CCW) 1바퀀 (과천형 타원) */
 export function stadiumPerimeter(straightHalf: number, cornerRadius: number) {
   return 4 * straightHalf + 2 * Math.PI * cornerRadius;
-}
-
-/** 슈트 접합(뒷직선 우·2코너) → 결승선 가상 길이 */
-function joinToFinishVirtual(straightHalf: number, cornerRadius: number) {
-  const L = straightHalf;
-  const R = cornerRadius;
-  return 2 * L + Math.PI * R + 2 * L * 0.9;
 }
 
 /**
@@ -612,7 +582,7 @@ export function getGateProgressForDistance(raceDistance: number, layout: OvalLay
 
 /** 트랙 맵 거리 마커 (JRA 스타일) */
 export function getTrackDistanceMarkers(layout: OvalLayout): TrackDistanceMarker[] {
-  const { cx, cy, straightHalf, cornerRadius, chuteLength } = layout;
+  const { cx, cy, straightHalf, cornerRadius } = layout;
   const R = cornerRadius + layout.laneWidth * 2;
   const markers: TrackDistanceMarker[] = [];
 

@@ -1,4 +1,4 @@
-import { kstDateKey, kstWeekId } from "./kst.js";
+import { kstDateKey } from "./kst.js";
 
 export const HIT_BOX_TABLE = [
   { tier: "일반", item: "골드 30~50", rate: 50 },

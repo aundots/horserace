@@ -99,7 +99,7 @@ export function HomePage({
     try {
       const res = await showRewardedAd(placement);
       toast.openToast(translateServerMessage(res.message || label, lang), {
-        type: "success",
+        type: "top",
       });
       const next = await getAdEligibility();
       setAdPlacements(next);

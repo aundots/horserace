@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Router } from "express";
-import { pickGhosts, saveGhost } from "../db/ghostStore.js";
+import { saveGhost } from "../db/ghostStore.js";
 import {
   consumePreparedRace,
   createPreparedRace,

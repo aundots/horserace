@@ -47,7 +47,7 @@ export function getOrAssignRoom(
   );
   if (existing) return existing;
 
-  let pool = [...rooms.values()].filter(
+  const pool = [...rooms.values()].filter(
     (r) =>
       r.weekId === weekId &&
       r.league === league &&

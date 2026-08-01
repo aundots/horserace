@@ -63,7 +63,7 @@ export function useAuth() {
       localStorage.setItem(SESSION_KEY, result.sessionId);
       setSessionId(result.sessionId);
       setUserKey(result.userKey);
-      toast.openToast("로그인되었어요.", { type: "success" });
+      toast.openToast("로그인되었어요.", { type: "top" });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "로그인에 실패했어요.";

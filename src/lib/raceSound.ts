@@ -8,7 +8,7 @@ const FADE_MS = 450;
 
 let cheerAudio: HTMLAudioElement | null = null;
 let cheerActive = false;
-let fadeTimer: ReturnType<typeof window.setInterval> | null = null;
+let fadeTimer: number | null = null;
 
 export function isRaceSoundEnabled(): boolean {
   if (typeof localStorage === "undefined") return true;

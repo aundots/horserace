@@ -30,7 +30,7 @@ function pick<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)]!;
 }
 
-export function rollJockey(horse: RaceHorse): JockeyInfo {
+export function rollJockey(): JockeyInfo {
   const winRate = Math.round(randBetween(8, 24));
   let tier: JockeyInfo["tier"] = "신예";
   if (winRate >= 20) tier = "에이스";
@@ -49,10 +49,10 @@ export function assignJockeys(horses: RaceHorse[]): Record<number, JockeyInfo> {
   const map: Record<number, JockeyInfo> = {};
 
   for (const horse of horses) {
-    let jockey = rollJockey(horse);
+    let jockey = rollJockey();
     let guard = 0;
     while (used.has(jockey.name) && guard < 12) {
-      jockey = rollJockey(horse);
+      jockey = rollJockey();
       guard += 1;
     }
     used.add(jockey.name);

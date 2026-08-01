@@ -175,7 +175,7 @@ export function RacePage({
           isPlayer: h.number === pickedNumber,
         };
       });
-  }, [horseStates, started, finished, entrantMap, pickedNumber]);
+  }, [horseStates, started, finished, entrantMap, pickedNumber, t]);
 
   const minimapHorses = horseStates.map(({ number, pos }) => {
     const entrant = entrantMap.get(number);

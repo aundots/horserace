@@ -1,5 +1,6 @@
 import { Router, type Response } from "express";
 import { getOrCreatePlayer } from "../db/playerStore.js";
+import { asyncHandler } from "../lib/asyncHandler.js";
 import {
   createParty,
   getParty,
@@ -37,35 +38,54 @@ async function respondParty(
   res.json({ ok: true, party: serializeParty(room, userKey) });
 }
 
-partyRouter.get("/mine", async (req, res) => {
-  const { userKey } = req as AuthedRequest;
-  const room = await getPartyForUser(userKey);
-  await respondParty(res, room, userKey);
-});
+partyRouter.get(
+  "/mine",
+  asyncHandler(async (req, res) => {
+    const { userKey } = req as AuthedRequest;
+    const room = await getPartyForUser(userKey);
+    await respondParty(res, room, userKey);
+  }),
+);
 
-partyRouter.post("/mine", async (req, res) => {
-  const { userKey } = req as AuthedRequest;
-  const partyCode = partyCodeFromBody(req.body);
-  const room = await getPartyForUser(userKey, partyCode);
-  await respondParty(res, room, userKey);
-});
+partyRouter.post(
+  "/mine",
+  asyncHandler(async (req, res) => {
+    const { userKey } = req as AuthedRequest;
+    const partyCode = partyCodeFromBody(req.body);
+    const room = await getPartyForUser(userKey, partyCode);
+    await respondParty(res, room, userKey);
+  }),
+);
 
-partyRouter.get("/:code", async (req, res) => {
-  const { userKey } = req as unknown as AuthedRequest;
-  const room = await getParty(req.params.code);
-  if (!room) {
-    res.status(404).json({ ok: false, message: "방을 찾을 수 없어요." });
-    return;
-  }
-  res.json({ ok: true, party: serializeParty(room, userKey) });
-});
+// 클라이언트는 이 경로를 쓰지 않는다(항상 /mine 으로 자기 방을 조회한다) —
+// 그래도 세션만 있으면 누구나 코드로 남의 방을 들여다볼 수 있던 구멍이라
+// 멤버 여부를 확인한다.
+partyRouter.get(
+  "/:code",
+  asyncHandler<{ code: string }>(async (req, res) => {
+    const { userKey } = req as unknown as AuthedRequest;
+    const room = await getParty(req.params.code);
+    if (!room) {
+      res.status(404).json({ ok: false, message: "방을 찾을 수 없어요." });
+      return;
+    }
+    if (!room.members.some((m) => m.userKey === userKey)) {
+      res.status(403).json({ ok: false, message: "방 멤버가 아니에요." });
+      return;
+    }
+    res.json({ ok: true, party: serializeParty(room, userKey) });
+  }),
+);
 
-partyRouter.post("/create", async (req, res) => {
-  const { userKey } = req as AuthedRequest;
-  const { displayName } = req.body ?? {};
-  const room = await createParty(userKey, displayName);
-  res.json({ ok: true, party: serializeParty(room, userKey) });
-});
+partyRouter.post(
+  "/create",
+  asyncHandler(async (req, res) => {
+    const { userKey } = req as AuthedRequest;
+    const { displayName } = req.body ?? {};
+    const room = await createParty(userKey, displayName);
+    res.json({ ok: true, party: serializeParty(room, userKey) });
+  }),
+);
 
 partyRouter.post("/join", async (req, res) => {
   const { userKey } = req as AuthedRequest;
@@ -85,11 +105,14 @@ partyRouter.post("/join", async (req, res) => {
   }
 });
 
-partyRouter.post("/leave", async (req, res) => {
-  const { userKey } = req as AuthedRequest;
-  await leaveParty(userKey);
-  res.json({ ok: true });
-});
+partyRouter.post(
+  "/leave",
+  asyncHandler(async (req, res) => {
+    const { userKey } = req as AuthedRequest;
+    await leaveParty(userKey);
+    res.json({ ok: true });
+  }),
+);
 
 partyRouter.post("/prepare", async (req, res) => {
   const { userKey } = req as AuthedRequest;

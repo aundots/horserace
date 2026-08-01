@@ -139,7 +139,7 @@ export function PartyPage({
     try {
       const next = await fn();
       setParty(next);
-      if (okMsg) toast.openToast(okMsg, { type: "success" });
+      if (okMsg) toast.openToast(okMsg, { type: "top" });
     } catch (error) {
       toast.openToast(
         translateServerMessage(error instanceof Error ? error.message : "실패", lang),
@@ -159,7 +159,7 @@ export function PartyPage({
     const inviteUrl = `${base}/?party=${party!.code}`;
     try {
       await navigator.clipboard.writeText(inviteUrl);
-      toast.openToast(t.inviteCopied, { type: "success" });
+      toast.openToast(t.inviteCopied, { type: "top" });
     } catch {
       try {
         await navigator.clipboard.writeText(party!.code);

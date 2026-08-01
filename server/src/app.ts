@@ -60,6 +60,27 @@ app.use("/party", partyRouter);
 app.use("/weekly-pass", weeklyPassRouter);
 app.use("/reward", rewardRouter);
 
+// 그 어떤 라우트에도 안 걸린 요청 — 404를 HTML 대신 API 응답 형태로 통일한다.
+app.use((_req, res) => {
+  res.status(404).json({ ok: false, message: "Not found" });
+});
+
+// 전역 에러 핸들러 — 반드시 마지막에 등록해야 Express가 에러 핸들러로 인식한다.
+// asyncHandler로 감싼 라우트가 reject 하면 여기로 온다. 클라이언트가 항상
+// { ok, message } 형태를 기대하므로 Express 기본 HTML 에러 페이지 대신 이걸 준다.
+app.use(
+  (
+    err: unknown,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction,
+  ) => {
+    console.error("[unhandled]", err);
+    if (res.headersSent) return;
+    res.status(500).json({ ok: false, message: "서버 오류가 발생했어요." });
+  },
+);
+
 startSettlementScheduler();
 
 export default app;

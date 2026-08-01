@@ -17,10 +17,6 @@ const PACK_GAP_M = 10.2;
 const SPREAD_RAMP_END = 0.18;
 const GATE_BLEND_END = 0.08;
 
-function horseAlongJitter(_horseNumber: number, _raceProgress: number): number {
-  return 0;
-}
-
 /** 출발 직후 순위 간격·게이트 정렬을 서서히 풀어줌 */
 function startSpreadFactor(raceProgress: number): number {
   if (raceProgress >= SPREAD_RAMP_END) return 1;
@@ -108,7 +104,6 @@ export function buildInterpolatedHorses(
   const spreadFactor = startSpreadFactor(p);
   const gateRemaining = raceDistance;
   const count = horseNumbers.length;
-  const jitterFade = 1 - p * 0.45;
 
   return horseNumbers.map((number) => {
     const rank0 = frame0.ranks.indexOf(number);
@@ -119,8 +114,7 @@ export function buildInterpolatedHorses(
     // 따라서 1위(rankIdx 0)는 남은 거리가 가장 작아야 한다.
     const ranksBehind = Math.max(0, count - 1 - rankIdx);
     const rankOffsetM = ranksBehind * PACK_GAP_M * spreadFactor;
-    const jitterM = horseAlongJitter(number, p) * jitterFade;
-    const racedRemaining = Math.max(0, baseRemaining - rankOffsetM + jitterM);
+    const racedRemaining = Math.max(0, baseRemaining - rankOffsetM);
     const metersRem = metersState
       ? smoothMetersRemaining(number, blendMetersRemaining(p, racedRemaining, gateRemaining), metersState, 0.42)
       : blendMetersRemaining(p, racedRemaining, gateRemaining);

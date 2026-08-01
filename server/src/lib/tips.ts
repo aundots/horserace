@@ -35,16 +35,6 @@ export function gradeIcon(grade: TipGrade) {
   return GRADE_ARROWS[grade];
 }
 
-function paceLabel(pace: string) {
-  const map: Record<string, string> = {
-    FRONT: "도주",
-    STALKER: "선행",
-    MID: "선입",
-    CLOSER: "추입",
-  };
-  return map[pace] ?? pace;
-}
-
 function trackLabel(track: RaceCondition["track"]) {
   if (track === "WET") return "습윤";
   if (track === "HEAVY") return "무거운";

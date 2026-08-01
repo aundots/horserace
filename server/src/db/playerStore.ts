@@ -15,7 +15,7 @@ import type { HorseCoatId } from "../lib/horseCoat.js";
 import { STAT_BUDGET, type HorseCustomizeInput } from "../lib/horseBuild.js";
 import { defaultCoatForUser, ensureHorseCoat, randomCoat } from "../lib/horseCoat.js";
 import { rankedTicketGoldPrice } from "../lib/economy.js";
-import { migrateRaceLoopFields, raceLoopSnapshot, resetSessionRaceStreak } from "../lib/raceLoop.js";
+import { migrateRaceLoopFields, raceLoopSnapshot } from "../lib/raceLoop.js";
 import { freshPass, syncPassWeek, type WeeklyPassState } from "../lib/weeklyPass.js";
 import { isDevUser } from "../lib/devAccess.js";
 import { isPlayDemoUser, PLAY_DEMO_RANKED_TICKETS_DAILY } from "../lib/playDemo.js";
@@ -328,9 +328,6 @@ export function getWeeklyRankScore(player: PlayerState) {
   if (sorted.length === 1) return sorted[0];
   return Math.round((sorted[0] + sorted[1]) / 2);
 }
-
-/** @deprecated 디비전·주간 랭킹 비활성화 */
-export function recordWeeklyScore(_player: PlayerState, _score: number) {}
 
 export function canPractice(player: PlayerState) {
   refreshRaceStamina(player);

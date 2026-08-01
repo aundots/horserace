@@ -166,7 +166,7 @@ export function PredictPage({
               try {
                 const nextPts = await onWatchAdForPoints();
                 setPoints(nextPts);
-                toast.openToast(t.pointsGained, { type: "success" });
+                toast.openToast(t.pointsGained, { type: "top" });
               } catch (error) {
                 toast.openToast(errorText(error, "광고 보상 실패"), {
                   type: "bottom",
