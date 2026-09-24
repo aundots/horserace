@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.aundots.horserace",
+      "sha256_cert_fingerprints": [
+        "8E:AE:FE:65:F1:48:9B:44:CB:A1:FB:79:5D:AF:F8:6E:40:20:EA:64:E9:FD:72:7F:2F:92:E3:7E:8B:1E:94:C9"
+      ]
+    }
+  }
+]
