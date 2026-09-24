@@ -19,3 +19,18 @@ agent-tools
 play-store/KEYSTORE.local.md
 play-store/keystore.env
 *.jks
+
+# BEGIN private-backup-files
+/.claude/settings.local.json
+/.cursor/skills/apps-in-toss.md
+/.cursor/skills/tds-mobile.md
+/.env
+/.env.play
+/play-store/KEYSTORE.local.md
+/play-store/android/local.properties
+/play-store/horserace-release.jks
+/play-store/keystore.env
+/server/.env
+/server/.vercel/README.txt
+/server/.vercel/project.json
+# END private-backup-files
