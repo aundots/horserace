@@ -34,3 +34,8 @@ play-store/keystore.env
 /server/.vercel/README.txt
 /server/.vercel/project.json
 # END private-backup-files
+
+# Hybrid runtime
+**/__pycache__/
+*.hybrid-restore-temp
+.backup-history/
